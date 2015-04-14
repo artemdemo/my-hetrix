@@ -1,0 +1,14 @@
+{
+  "name": "my-hextris",
+  "version": "0.1.0",
+  "description": "Clone of hetrix with SVG technology",
+  "main": "index.html",
+  "author": "Artem Demo",
+  "license": "BSD-2-Clause",
+  "devDependencies": {
+    "grunt": "~0.4.5",
+    "snapsvg": "~0.4.0",
+    "grunt-contrib-watch": "~0.6.1",
+    "grunt-contrib-less": "~1.0.1"
+  }
+}
