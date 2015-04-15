@@ -11,41 +11,91 @@ var Base = (function () {
         wHeight = window.innerHeight - 10;
         this.$gamePaper.node.style.height = wHeight + '.px';
         // Setting up basic data about control hexagon element
-        this.$base.baseX = window.innerWidth / 2;
-        this.$base.baseY = window.innerHeight / 2;
-        this.$base.radius = 150;
+        this.$base = {
+            baseEl: null,
+            baseX: window.innerWidth / 2,
+            baseY: window.innerHeight / 2,
+            rotationTime: 100,
+            radius: 150,
+            edgesNum: 6
+        };
         this.drawBase();
+        this.bindEvents();
     }
     /**
      * Drawing the main control element of the game
+     *
+     * @param startAngle {number} - starting angle for the base element
      */
-    Base.prototype.drawBase = function () {
-        var startAngle = 0, endAngle = 0; // startAngle & endAngle are in degrees
+    Base.prototype.drawBase = function (startAngle) {
+        if (startAngle === void 0) { startAngle = 0; }
+        var angle = startAngle; // angle are in degrees
         var baseRadius = this.$base.radius;
-        var edgesNum = 6;
-        var x1, x2, y1, y2 = 0;
-        var startX, startY;
+        var angleStep = 360 / this.$base.edgesNum;
+        var edgesNum = this.$base.edgesNum - 1; // I will not need the last edge - path will close automatically
+        var pathStr;
+        var x = this.$base.baseX + baseRadius * Math.cos(Math.PI * angle / 180);
+        var y = this.$base.baseY + baseRadius * Math.sin(Math.PI * angle / 180);
+        pathStr = "M " + String(x) + "," + String(y) + " ";
         for (var i = 0; i < edgesNum; i++) {
-            startAngle = endAngle;
-            endAngle = startAngle + 30;
-            x1 = this.$base.baseX + baseRadius * Math.cos(Math.PI * startAngle / 180);
-            y1 = this.$base.baseY + baseRadius * Math.sin(Math.PI * startAngle / 180);
-            x2 = this.$base.baseX + baseRadius * Math.cos(Math.PI * endAngle / 180);
-            y2 = this.$base.baseY + baseRadius * Math.sin(Math.PI * endAngle / 180);
-            /*
-             * Solving problem of not fitting the last sector with the first one
-             * This problem cases by number rounding, and the easiest way to solve it - is to use the same coordinates for the last point as for the first one
-             */
-            if (i == 0) {
-                startX = x1;
-                startY = y1;
-            }
-            else if (i == edgesNum - 1) {
-                x2 = startX;
-                y2 = startY;
-            }
+            angle += angleStep;
+            x = this.$base.baseX + baseRadius * Math.cos(Math.PI * angle / 180);
+            y = this.$base.baseY + baseRadius * Math.sin(Math.PI * angle / 180);
+            pathStr += "L " + String(x) + "," + String(y) + " ";
         }
-        this.$base.baseEl = this.$gamePaper.circle(150, 150, 100);
+        if (this.$base.baseEl == null) {
+            this.$base.baseEl = this.$gamePaper.path(pathStr);
+            this.$base.baseEl.node.id = 'base';
+        }
+        else {
+            this.$base.baseEl.attr({ d: pathStr });
+        }
+    };
+    /**
+     * Binding keyboard events in order to rotate base
+     */
+    Base.prototype.bindEvents = function () {
+        var _this = this;
+        document.addEventListener("keydown", function (e) {
+            switch (e.keyCode) {
+                case 37:
+                    _this.fireLeft();
+                    break;
+                case 39:
+                    _this.fireRight();
+                    break;
+            }
+        }, false);
+    };
+    /**
+     * Actions in case LEFT arrow was clicked
+     */
+    Base.prototype.fireLeft = function () {
+        this.rotateBase('left');
+    };
+    /**
+     * Actions in case LEFT arrow was clicked
+     */
+    Base.prototype.fireRight = function () {
+        this.rotateBase('right');
+    };
+    /**
+     * Rotate base
+     * @param direction {string} - 'left' or 'right'
+     */
+    Base.prototype.rotateBase = function (direction) {
+        var _this = this;
+        var x, y, angle;
+        angle = String(360 / this.$base.edgesNum); // angle of rotation
+        // coordinates of rotation center
+        x = String(this.$base.baseX);
+        y = String(this.$base.baseY);
+        if (direction == 'left')
+            angle = '-' + angle;
+        this.$base.baseEl.animate({ transform: "r" + angle + "," + x + "," + y }, this.$base.rotationTime, null, function () {
+            // removing attribute, so I will be able to use it again
+            _this.$base.baseEl.node.removeAttribute('transform');
+        });
     };
     return Base;
 })();

@@ -117,6 +117,7 @@ declare module Snap {
 
     export function Matrix(a: number, b: number, c: number, d: number, e: number, f: number): Matrix;
     export function Matrix(svgMatrix: SVGMatrix): Matrix;
+    export function Matrix(): void;
 
     export function getRGB(color: string): Object;
     export function hsb(h: number, s: number, b: number): string;
