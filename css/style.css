@@ -8,3 +8,9 @@ body {
 #base {
   fill: #1f1b36;
 }
+#field {
+  fill: #EFEFEF;
+}
+.ygreen {
+  fill: #448c0a;
+}
