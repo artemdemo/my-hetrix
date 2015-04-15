@@ -1,6 +1,7 @@
 
 interface brickDataConfig {
     brickEl: any;
+    className: string;
 }
 
 class Brick {
@@ -13,16 +14,22 @@ class Brick {
         this.$baseObjRef = base;
 
         this.$brick = {
-            brickEl: null
+            brickEl: null,
+            className: 'brick ygreen'
         };
 
-        this.drawBrick();
+        this.drawBrick( this.$baseObjRef.$field.radius );
     }
 
-    drawBrick() {
+    /**
+     * Drawing brick
+     *
+     * @param startRadius {number}
+     */
+    drawBrick( startRadius: number ) {
         var $base = this.$baseObjRef.$base;
 
-        var baseRadius = this.$baseObjRef.$field.radius;
+        var baseRadius = startRadius;
         var angle = $base.startAngle;
         var edgesNum = $base.edgesNum;
         var brickPath: string;
@@ -41,8 +48,16 @@ class Brick {
         brickPath += nextLine(baseRadius, angle);
 
         this.$brick.brickEl = this.$baseObjRef.$gamePaper.path( brickPath );
-        console.log( this.$brick.brickEl );
-        this.$brick.brickEl.node.setAttribute( 'class', 'brick ygreen' );
+        this.$brick.brickEl.node.setAttribute( 'class', this.$brick.className );
+
+        if ( this.$brick.brickEl == null ) {
+            // If there is no brick element - creating one
+            this.$brick.brickEl = this.$baseObjRef.$gamePaper.path( brickPath );
+            this.$brick.brickEl.node.setAttribute( 'class', this.$brick.className );
+        } else {
+            // If it exists - changing path
+            this.$brick.brickEl.attr({ d: brickPath });
+        }
 
         function nextLine(baseRadius, angle) {
             x = $base.baseX + baseRadius * Math.cos(Math.PI * angle / 180);
