@@ -37,6 +37,8 @@ class Base {
      */
     $field: fieldDataConfig;
 
+    private attachedBricks = [];
+
     constructor(gameID: string) {
         var wHeight:number;
 
@@ -119,6 +121,14 @@ class Base {
     }
 
     /**
+     * Attac new brick to the base
+     * @param newBrick
+     */
+    attachBrick( newBrick: Brick ) {
+        this.attachedBricks.push( newBrick );
+    }
+
+    /**
      * Binding keyboard events in order to rotate base
      */
     private bindEvents() {
@@ -139,6 +149,7 @@ class Base {
      */
     fireLeft() {
         this.rotateBase('left');
+        this.rotateBricks('left');
     }
 
     /**
@@ -146,6 +157,7 @@ class Base {
      */
     fireRight() {
         this.rotateBase('right');
+        this.rotateBricks('right');
     }
 
     /**
@@ -168,5 +180,13 @@ class Base {
                 this.$base.baseEl.node.removeAttribute('transform');
             }
         );
+    }
+
+    private rotateBricks ( direction: string ) {
+        if ( this.attachedBricks.length == 0 ) return false;
+        for ( var i=0, len=this.attachedBricks.length; i<len; i++ ) {
+            var brick = this.attachedBricks[i];
+            brick.rotateBrick( direction );
+        }
     }
 }

@@ -65,8 +65,7 @@ class Brick {
             if (radius - this.$brick.height - this.$brick.gap > this.$baseObjRef.$base.radius && !! this.activeFalling ) {
                 (window.requestAnimationFrame && requestAnimationFrame(tick)) || setTimeout(tick, 16)
             } else {
-                console.log( this.$brick );
-                this.activeFalling = false;
+                this.stopFalling();
             }
         };
 
@@ -78,6 +77,7 @@ class Brick {
      */
     stopFalling() {
         this.activeFalling = false;
+        this.$baseObjRef.attachBrick( this );
     }
 
     /**
@@ -97,8 +97,13 @@ class Brick {
             base.rotationTime,
             null, // easing function
             () => {
+                this.$brick.startAngle = this.$brick.startAngle + parseFloat(angle);
+
                 // removing attribute, so I will be able to use it again
-                this.$base.baseEl.node.removeAttribute('transform');
+                this.$brick.brickEl.node.removeAttribute('transform');
+
+                // redraw brick in new position
+                this.drawBrick( this.$brick.radiusPosition );
             }
         );
     }

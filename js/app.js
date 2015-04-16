@@ -4,6 +4,7 @@
  */
 var Base = (function () {
     function Base(gameID) {
+        this.attachedBricks = [];
         var wHeight;
         // Create main game paper
         this.$gamePaper = Snap(gameID);
@@ -68,6 +69,13 @@ var Base = (function () {
         }
     };
     /**
+     * Attac new brick to the base
+     * @param newBrick
+     */
+    Base.prototype.attachBrick = function (newBrick) {
+        this.attachedBricks.push(newBrick);
+    };
+    /**
      * Binding keyboard events in order to rotate base
      */
     Base.prototype.bindEvents = function () {
@@ -88,12 +96,14 @@ var Base = (function () {
      */
     Base.prototype.fireLeft = function () {
         this.rotateBase('left');
+        this.rotateBricks('left');
     };
     /**
      * Actions in case LEFT arrow was clicked
      */
     Base.prototype.fireRight = function () {
         this.rotateBase('right');
+        this.rotateBricks('right');
     };
     /**
      * Rotate base
@@ -112,6 +122,14 @@ var Base = (function () {
             // removing attribute, so I will be able to use it again
             _this.$base.baseEl.node.removeAttribute('transform');
         });
+    };
+    Base.prototype.rotateBricks = function (direction) {
+        if (this.attachedBricks.length == 0)
+            return false;
+        for (var i = 0, len = this.attachedBricks.length; i < len; i++) {
+            var brick = this.attachedBricks[i];
+            brick.rotateBrick(direction);
+        }
     };
     return Base;
 })();
@@ -154,8 +172,7 @@ var Brick = (function () {
                 (window.requestAnimationFrame && requestAnimationFrame(tick)) || setTimeout(tick, 16);
             }
             else {
-                console.log(_this.$brick);
-                _this.activeFalling = false;
+                _this.stopFalling();
             }
         };
         tick();
@@ -165,8 +182,29 @@ var Brick = (function () {
      */
     Brick.prototype.stopFalling = function () {
         this.activeFalling = false;
+        this.$baseObjRef.attachBrick(this);
     };
-    Brick.prototype.rotateBrick = function () {
+    /**
+     * Rotate brick
+     * @param direction
+     */
+    Brick.prototype.rotateBrick = function (direction) {
+        var _this = this;
+        var x, y, angle;
+        var base = this.$baseObjRef.$base;
+        angle = String(360 / base.edgesNum); // angle of rotation
+        // coordinates of rotation center
+        x = String(base.baseX);
+        y = String(base.baseY);
+        if (direction == 'left')
+            angle = '-' + angle;
+        this.$brick.brickEl.animate({ transform: "r" + angle + "," + x + "," + y }, base.rotationTime, null, function () {
+            _this.$brick.startAngle = _this.$brick.startAngle + parseFloat(angle);
+            // removing attribute, so I will be able to use it again
+            _this.$brick.brickEl.node.removeAttribute('transform');
+            // redraw brick in new position
+            _this.drawBrick(_this.$brick.radiusPosition);
+        });
     };
     /**
      * Drawing brick
