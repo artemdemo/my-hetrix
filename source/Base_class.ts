@@ -121,7 +121,7 @@ class Base {
     /**
      * Binding keyboard events in order to rotate base
      */
-    bindEvents() {
+    private bindEvents() {
         document.addEventListener("keydown", (e) => {
             switch( e.keyCode ) {
                 case 37:
@@ -152,7 +152,7 @@ class Base {
      * Rotate base
      * @param direction {string} - 'left' or 'right'
      */
-    rotateBase( direction: string ) {
+    private rotateBase( direction: string ) {
         var x,y,angle: string;
         angle = String( 360 / this.$base.edgesNum ); // angle of rotation
         // coordinates of rotation center

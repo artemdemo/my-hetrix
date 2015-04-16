@@ -116,23 +116,67 @@ var Base = (function () {
     return Base;
 })();
 var Brick = (function () {
+    /**
+     * Object constructor
+     * @param base
+     */
     function Brick(base) {
+        var radiusPos = base.$field.radius;
+        var edgesNum = base.$base.edgesNum;
         this.$baseObjRef = base;
         this.$brick = {
             brickEl: null,
-            className: 'brick ygreen'
+            className: 'brick ygreen',
+            speed: 10,
+            radiusPosition: radiusPos,
+            height: 20,
+            gap: 3,
+            startAngle: 360 / edgesNum * Math.floor(Math.random() * edgesNum) // random number between 0 and edges amount
         };
-        this.drawBrick(this.$baseObjRef.$field.radius);
+        this.drawBrick(radiusPos);
+        this.startFalling();
     }
+    /**
+     * Start brick falling
+     */
+    Brick.prototype.startFalling = function () {
+        var _this = this;
+        var last = +new Date();
+        // ToDo: speed need to be recalculated after stopping
+        var speed = this.$brick.speed;
+        var radius = this.$brick.radiusPosition;
+        this.activeFalling = true;
+        var tick = function () {
+            radius = radius - (+new Date() - last) / speed;
+            last = +new Date();
+            _this.drawBrick(radius);
+            if (radius - _this.$brick.height - _this.$brick.gap > _this.$baseObjRef.$base.radius && !!_this.activeFalling) {
+                (window.requestAnimationFrame && requestAnimationFrame(tick)) || setTimeout(tick, 16);
+            }
+            else {
+                console.log(_this.$brick);
+                _this.activeFalling = false;
+            }
+        };
+        tick();
+    };
+    /**
+     * Stop brick from falling
+     */
+    Brick.prototype.stopFalling = function () {
+        this.activeFalling = false;
+    };
+    Brick.prototype.rotateBrick = function () {
+    };
     /**
      * Drawing brick
      *
-     * @param startRadius {number}
+     * @param startRadius {number} - optional
      */
     Brick.prototype.drawBrick = function (startRadius) {
         var $base = this.$baseObjRef.$base;
         var baseRadius = startRadius;
-        var angle = $base.startAngle;
+        var angle = this.$brick.startAngle;
         var edgesNum = $base.edgesNum;
         var brickPath;
         var x = $base.baseX + baseRadius * Math.cos(Math.PI * angle / 180);
@@ -140,12 +184,11 @@ var Brick = (function () {
         brickPath = "M " + String(x) + "," + String(y) + " ";
         angle += 360 / edgesNum;
         brickPath += nextLine(baseRadius, angle);
-        baseRadius -= 20;
+        baseRadius -= this.$brick.height;
         brickPath += nextLine(baseRadius, angle);
         angle -= 360 / edgesNum;
         brickPath += nextLine(baseRadius, angle);
-        this.$brick.brickEl = this.$baseObjRef.$gamePaper.path(brickPath);
-        this.$brick.brickEl.node.setAttribute('class', this.$brick.className);
+        this.$brick.radiusPosition = startRadius;
         if (this.$brick.brickEl == null) {
             // If there is no brick element - creating one
             this.$brick.brickEl = this.$baseObjRef.$gamePaper.path(brickPath);
