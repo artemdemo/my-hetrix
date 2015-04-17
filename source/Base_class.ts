@@ -37,7 +37,7 @@ class Base {
      */
     $field: fieldDataConfig;
 
-    private attachedBricks = [];
+    private attachedBricks:Brick[] = [];
 
     constructor(gameID: string) {
         var wHeight:number;
@@ -126,6 +126,23 @@ class Base {
      */
     attachBrick( newBrick: Brick ) {
         this.attachedBricks.push( newBrick );
+    }
+
+    /**
+     * Return array of attached bricks that fit to given angle
+     * @param angle
+     * @returns {Brick[]}
+     */
+    getAttachedBricksByAnglePos ( angle: number ) {
+        var bricksArr = this.attachedBricks;
+        var resultArr:Brick[] = [];
+
+        for ( var i=0, len=bricksArr.length; i<len; i++ ) {
+            var brick:Brick = bricksArr[i];
+            if ( brick.$brick.anglePosition == angle ) resultArr.push( brick );
+        }
+
+        return resultArr;
     }
 
     /**

@@ -33,7 +33,7 @@ class Brick {
         this.$brick = {
             brickEl: null,
             className: 'ygreen',
-            speed: 10,
+            speed: 5,
             radiusPosition: radiusPos,
             height: 20,
             gap: 3,
@@ -52,17 +52,18 @@ class Brick {
         var last = +new Date();
         // ToDo: speed need to be recalculated after stopping
         var speed = this.$brick.speed;
-        var radius = this.$brick.radiusPosition;
+        var currentRadiusPos = this.$brick.radiusPosition;
 
         this.activeFalling = true;
 
         var tick = () => {
-            radius = radius - (+new Date() - last) / speed;
+            var minRadius = this.getMinRadiusFall();
+            currentRadiusPos -= (+new Date() - last) / speed;
             last = +new Date();
 
-            this.drawBrick( radius );
+            this.drawBrick( currentRadiusPos );
 
-            if (radius - this.$brick.height - this.$brick.gap > this.$baseObjRef.$base.radius && !! this.activeFalling ) {
+            if (currentRadiusPos > minRadius && !! this.activeFalling ) {
                 (window.requestAnimationFrame && requestAnimationFrame(tick)) || setTimeout(tick, 16)
             } else {
                 this.stopFalling();
@@ -77,6 +78,10 @@ class Brick {
      */
     stopFalling() {
         this.activeFalling = false;
+
+        // I need to redraw brick after stopping the animation to be sure that it will take the exact right position
+        this.drawBrick( this.getMinRadiusFall() );
+
         this.$baseObjRef.attachBrick( this );
     }
 
@@ -150,6 +155,30 @@ class Brick {
             y = $base.baseY + baseRadius * Math.sin(Math.PI * angle / 180);
             return "L " + String(x) + "," + String(y) + " ";
         }
+    }
+
+    /**
+     * Return min radius fall for the current brick.
+     * Check if there are bricks in the way and calculate where current brick need to stop fall animation.
+     *
+     * @returns {number}
+     */
+    private getMinRadiusFall():number {
+        var $brick = this.$brick;
+        var $base = this.$baseObjRef;
+        var minRadius:number;
+        var attachedBricks:Brick[] = $base.getAttachedBricksByAnglePos( $brick.anglePosition );
+
+        minRadius = $base.$base.radius + $brick.height + $brick.gap;
+
+        if ( attachedBricks.length > 0 ) {
+            for ( var i=0, len=attachedBricks.length; i<len; i++ ) {
+                var brick:Brick = attachedBricks[i];
+                minRadius += brick.$brick.height + brick.$brick.gap;
+            }
+        }
+
+        return minRadius;
     }
 
 

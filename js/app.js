@@ -76,6 +76,21 @@ var Base = (function () {
         this.attachedBricks.push(newBrick);
     };
     /**
+     * Return array of attached bricks that fit to given angle
+     * @param angle
+     * @returns {Brick[]}
+     */
+    Base.prototype.getAttachedBricksByAnglePos = function (angle) {
+        var bricksArr = this.attachedBricks;
+        var resultArr = [];
+        for (var i = 0, len = bricksArr.length; i < len; i++) {
+            var brick = bricksArr[i];
+            if (brick.$brick.anglePosition == angle)
+                resultArr.push(brick);
+        }
+        return resultArr;
+    };
+    /**
      * Binding keyboard events in order to rotate base
      */
     Base.prototype.bindEvents = function () {
@@ -151,7 +166,7 @@ var Brick = (function () {
         this.$brick = {
             brickEl: null,
             className: 'ygreen',
-            speed: 10,
+            speed: 5,
             radiusPosition: radiusPos,
             height: 20,
             gap: 3,
@@ -168,13 +183,14 @@ var Brick = (function () {
         var last = +new Date();
         // ToDo: speed need to be recalculated after stopping
         var speed = this.$brick.speed;
-        var radius = this.$brick.radiusPosition;
+        var currentRadiusPos = this.$brick.radiusPosition;
         this.activeFalling = true;
         var tick = function () {
-            radius = radius - (+new Date() - last) / speed;
+            var minRadius = _this.getMinRadiusFall();
+            currentRadiusPos -= (+new Date() - last) / speed;
             last = +new Date();
-            _this.drawBrick(radius);
-            if (radius - _this.$brick.height - _this.$brick.gap > _this.$baseObjRef.$base.radius && !!_this.activeFalling) {
+            _this.drawBrick(currentRadiusPos);
+            if (currentRadiusPos > minRadius && !!_this.activeFalling) {
                 (window.requestAnimationFrame && requestAnimationFrame(tick)) || setTimeout(tick, 16);
             }
             else {
@@ -188,6 +204,8 @@ var Brick = (function () {
      */
     Brick.prototype.stopFalling = function () {
         this.activeFalling = false;
+        // I need to redraw brick after stopping the animation to be sure that it will take the exact right position
+        this.drawBrick(this.getMinRadiusFall());
         this.$baseObjRef.attachBrick(this);
     };
     /**
@@ -249,6 +267,26 @@ var Brick = (function () {
         }
     };
     /**
+     * Return min radius fall for the current brick.
+     * Check if there are bricks in the way and calculate where current brick need to stop fall animation.
+     *
+     * @returns {number}
+     */
+    Brick.prototype.getMinRadiusFall = function () {
+        var $brick = this.$brick;
+        var $base = this.$baseObjRef;
+        var minRadius;
+        var attachedBricks = $base.getAttachedBricksByAnglePos($brick.anglePosition);
+        minRadius = $base.$base.radius + $brick.height + $brick.gap;
+        if (attachedBricks.length > 0) {
+            for (var i = 0, len = attachedBricks.length; i < len; i++) {
+                var brick = attachedBricks[i];
+                minRadius += brick.$brick.height + brick.$brick.gap;
+            }
+        }
+        return minRadius;
+    };
+    /**
      * Normalize angle.
      * Converts -20 to 340.
      *
@@ -274,6 +312,11 @@ var Brick = (function () {
 /// <reference path="Base_class.ts" />
 /// <reference path="Brick_class.ts" />
 var base = new Base('#game');
-var brick0 = new Brick(base);
-var brick1 = new Brick(base);
+var bricksCount = 1;
+new Brick(base);
+var _interval = setInterval(function () {
+    new Brick(base);
+    if (bricksCount++ > 5)
+        clearInterval(_interval);
+}, 1500);
 //# sourceMappingURL=app.js.map

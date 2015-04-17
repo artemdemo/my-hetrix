@@ -3,5 +3,11 @@
 
 var base = new Base( '#game' );
 
-var brick0 = new Brick( base );
-var brick1 = new Brick( base );
+var bricksCount = 1;
+
+new Brick( base );
+
+var _interval = setInterval(function(){
+    new Brick( base );
+    if ( bricksCount++ > 5 ) clearInterval(_interval);
+}, 1500);
