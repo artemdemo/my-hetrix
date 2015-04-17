@@ -123,6 +123,11 @@ var Base = (function () {
             _this.$base.baseEl.node.removeAttribute('transform');
         });
     };
+    /**
+     * Rotate attached bricks
+     * @param direction
+     * @returns {boolean}
+     */
     Base.prototype.rotateBricks = function (direction) {
         if (this.attachedBricks.length == 0)
             return false;
@@ -130,6 +135,7 @@ var Base = (function () {
             var brick = this.attachedBricks[i];
             brick.rotateBrick(direction);
         }
+        return true;
     };
     return Base;
 })();
@@ -144,12 +150,12 @@ var Brick = (function () {
         this.$baseObjRef = base;
         this.$brick = {
             brickEl: null,
-            className: 'brick ygreen',
+            className: 'ygreen',
             speed: 10,
             radiusPosition: radiusPos,
             height: 20,
             gap: 3,
-            startAngle: 360 / edgesNum * Math.floor(Math.random() * edgesNum) // random number between 0 and edges amount
+            anglePosition: 360 / edgesNum * Math.floor(Math.random() * edgesNum) // random number between 0 and edges amount
         };
         this.drawBrick(radiusPos);
         this.startFalling();
@@ -199,7 +205,7 @@ var Brick = (function () {
         if (direction == 'left')
             angle = '-' + angle;
         this.$brick.brickEl.animate({ transform: "r" + angle + "," + x + "," + y }, base.rotationTime, null, function () {
-            _this.$brick.startAngle = _this.$brick.startAngle + parseFloat(angle);
+            _this.$brick.anglePosition = Brick.normalizeAngle(_this.$brick.anglePosition + parseFloat(angle));
             // removing attribute, so I will be able to use it again
             _this.$brick.brickEl.node.removeAttribute('transform');
             // redraw brick in new position
@@ -214,7 +220,7 @@ var Brick = (function () {
     Brick.prototype.drawBrick = function (startRadius) {
         var $base = this.$baseObjRef.$base;
         var baseRadius = startRadius;
-        var angle = this.$brick.startAngle;
+        var angle = this.$brick.anglePosition;
         var edgesNum = $base.edgesNum;
         var brickPath;
         var x = $base.baseX + baseRadius * Math.cos(Math.PI * angle / 180);
@@ -242,10 +248,32 @@ var Brick = (function () {
             return "L " + String(x) + "," + String(y) + " ";
         }
     };
+    /**
+     * Normalize angle.
+     * Converts -20 to 340.
+     *
+     * @param angle {number}
+     * @returns {number}
+     */
+    Brick.normalizeAngle = function (angle) {
+        var newAngle;
+        switch (true) {
+            case angle < 0:
+                newAngle = angle + 360;
+                break;
+            case angle > 360:
+                newAngle = angle - 360;
+                break;
+            default:
+                newAngle = angle;
+        }
+        return newAngle;
+    };
     return Brick;
 })();
 /// <reference path="Base_class.ts" />
 /// <reference path="Brick_class.ts" />
 var base = new Base('#game');
-var brick = new Brick(base);
+var brick0 = new Brick(base);
+var brick1 = new Brick(base);
 //# sourceMappingURL=app.js.map

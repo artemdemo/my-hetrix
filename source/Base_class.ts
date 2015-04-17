@@ -182,11 +182,17 @@ class Base {
         );
     }
 
+    /**
+     * Rotate attached bricks
+     * @param direction
+     * @returns {boolean}
+     */
     private rotateBricks ( direction: string ) {
         if ( this.attachedBricks.length == 0 ) return false;
         for ( var i=0, len=this.attachedBricks.length; i<len; i++ ) {
             var brick = this.attachedBricks[i];
             brick.rotateBrick( direction );
         }
+        return true;
     }
 }

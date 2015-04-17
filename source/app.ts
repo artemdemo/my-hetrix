@@ -3,4 +3,5 @@
 
 var base = new Base( '#game' );
 
-var brick = new Brick( base );
+var brick0 = new Brick( base );
+var brick1 = new Brick( base );

@@ -6,7 +6,7 @@ interface brickDataConfig {
     radiusPosition: number; // radius that determine position of the brick
     height: number;
     gap: number; // gap before next brick
-    startAngle: number; // will determine home section of the brick
+    anglePosition: number; // will determine home section of the brick
 }
 
 class Brick {
@@ -32,12 +32,12 @@ class Brick {
 
         this.$brick = {
             brickEl: null,
-            className: 'brick ygreen',
+            className: 'ygreen',
             speed: 10,
             radiusPosition: radiusPos,
             height: 20,
             gap: 3,
-            startAngle: 360 / edgesNum * Math.floor(Math.random() * edgesNum) // random number between 0 and edges amount
+            anglePosition: 360 / edgesNum * Math.floor(Math.random() * edgesNum) // random number between 0 and edges amount
         };
 
         this.drawBrick( radiusPos );
@@ -97,7 +97,7 @@ class Brick {
             base.rotationTime,
             null, // easing function
             () => {
-                this.$brick.startAngle = this.$brick.startAngle + parseFloat(angle);
+                this.$brick.anglePosition = Brick.normalizeAngle( this.$brick.anglePosition + parseFloat(angle) );
 
                 // removing attribute, so I will be able to use it again
                 this.$brick.brickEl.node.removeAttribute('transform');
@@ -117,7 +117,7 @@ class Brick {
         var $base = this.$baseObjRef.$base;
 
         var baseRadius = startRadius;
-        var angle = this.$brick.startAngle;
+        var angle = this.$brick.anglePosition;
         var edgesNum = $base.edgesNum;
         var brickPath: string;
 
@@ -150,6 +150,29 @@ class Brick {
             y = $base.baseY + baseRadius * Math.sin(Math.PI * angle / 180);
             return "L " + String(x) + "," + String(y) + " ";
         }
+    }
+
+
+    /**
+     * Normalize angle.
+     * Converts -20 to 340.
+     *
+     * @param angle {number}
+     * @returns {number}
+     */
+    private static normalizeAngle ( angle:number ):number {
+        var newAngle: number;
+        switch ( true ) {
+            case angle < 0:
+                newAngle = angle + 360;
+                break;
+            case angle > 360:
+                newAngle = angle - 360;
+                break;
+            default:
+                newAngle = angle;
+        }
+        return newAngle;
     }
 
 }
