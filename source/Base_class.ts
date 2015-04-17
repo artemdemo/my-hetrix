@@ -3,7 +3,7 @@
 /**
  * Interface for basic configuration of control hexagon
  */
-interface baseDataConfig {
+interface baseData {
     baseEl: any;
     baseX: number;
     baseY: number;
@@ -13,9 +13,13 @@ interface baseDataConfig {
     startAngle: number; // start angle is important if base is not symmetric - on this angle will be based all graphics
 }
 
-interface fieldDataConfig {
+interface fieldData {
     fieldEl: any;
     radius: number;
+}
+
+interface filteredBricks {
+    [color: string]: Brick[]
 }
 
 /**
@@ -30,12 +34,19 @@ class Base {
     /**
      * Base control element of the game
      */
-    $base: baseDataConfig;
+    $base: baseData;
 
     /**
      * Background field
      */
-    $field: fieldDataConfig;
+    $field: fieldData;
+
+    /**
+     * Brick colors
+     * @type {string[]}
+     */
+    //colors:string[] = [ 'ygreen', 'blue', 'cyan', 'purple', 'orange' ];
+    colors:string[] = [ 'blue' ];
 
     private attachedBricks:Brick[] = [];
 
@@ -126,6 +137,8 @@ class Base {
      */
     attachBrick( newBrick: Brick ) {
         this.attachedBricks.push( newBrick );
+        console.log( this.getAttachedBricksByAnglePos( newBrick.$brick.anglePosition ) );
+        this.processCombinations();
     }
 
     /**
@@ -143,6 +156,84 @@ class Base {
         }
 
         return resultArr;
+    }
+
+    /**
+     * Check whether there is any color combinations.
+     * If there is - process it.
+     * @return {boolean}
+     */
+    private processCombinations() {
+        var filteredBricks: filteredBricks;
+        if ( this.attachedBricks.length == 0 ) return false;
+
+        // Filter all bricks by color
+        filteredBricks = this.filterBricksByColor();
+
+        for ( var color in filteredBricks ) {
+            var len = filteredBricks[color].length;
+            var siblings:number[] = [];
+            if ( len < 3 ) continue;
+
+            for ( var i=0; i<len; i++ ) {
+                siblings = Array.prototype.concat( siblings, this.checkForSiblings( filteredBricks[color], i ) );
+            }
+
+            if ( siblings.length > 2 ) {
+                // remove duplicate values
+                // It's expensive calculation, therefore I'm checking that there is more then 2 items in array
+                siblings = Base.UniqArray(siblings);
+            }
+
+        }
+    }
+
+    /**
+     * Check whether given brick siblings
+     * @param bricksArray {Brick[]}
+     * @param baseBrickID {number} -index of brick in bricksArray that should be checked
+     */
+    private checkForSiblings( bricksArray:Brick[], baseBrickID:number = 0 ):number[] {
+        var baseBrick:brickData = bricksArray[baseBrickID].$brick;
+        var results:number[] = [];
+        var nextBrickRadMax:number = baseBrick.radiusPosition + baseBrick.height + baseBrick.gap;
+        var nextBrickRadMin:number = baseBrick.radiusPosition - baseBrick.height - baseBrick.gap;
+        var nextBrickAngMax:number = bricksArray[baseBrickID].normalizeAngle( baseBrick.anglePosition + 360 / this.$base.edgesNum );
+        var nextBrickAngMin:number = bricksArray[baseBrickID].normalizeAngle( baseBrick.anglePosition - 360 / this.$base.edgesNum );
+
+        for ( var i=0, len=bricksArray.length; i<len; i++ ) {
+            var _brick:brickData = bricksArray[i].$brick;
+            if (
+                ( _brick.radiusPosition == baseBrick.radiusPosition && ( _brick.anglePosition <= nextBrickAngMax && _brick.anglePosition >= nextBrickAngMin ) ) ||
+                ( _brick.anglePosition == baseBrick.anglePosition && ( _brick.radiusPosition <= nextBrickRadMax && _brick.radiusPosition >= nextBrickRadMin ) )
+            ) {
+                results.push( i );
+            }
+        }
+
+        if ( results.length < 3 ) results = [];
+
+        return results;
+    }
+
+    /**
+     * Filter bricks by color and return object of arrays
+     * @returns {filteredBricks}
+     */
+    private filterBricksByColor():filteredBricks {
+        var attachedBricks = this.attachedBricks;
+        var len = attachedBricks.length;
+        var filteredBricks: filteredBricks = {};
+
+        for ( var i=0; i<len; i++ ) {
+            var brick:Brick = attachedBricks[i];
+            var className:string = brick.$brick.className;
+
+            if ( ! filteredBricks.hasOwnProperty( className ) ) filteredBricks[ className ] = [];
+            filteredBricks[ className ].push( brick );
+        }
+
+        return filteredBricks;
     }
 
     /**
@@ -211,5 +302,19 @@ class Base {
             brick.rotateBrick( direction );
         }
         return true;
+    }
+
+    /**
+     * Remove duplicate values from tha array
+     *
+     * @source http://stackoverflow.com/a/17903018
+     * @param a {Array}
+     * @returns {Array}
+     */
+    private static UniqArray (a) {
+        return a.reduce(function(p, c) {
+            if (p.indexOf(c) < 0) p.push(c);
+            return p;
+        }, []);
     }
 }

@@ -4,6 +4,12 @@
  */
 var Base = (function () {
     function Base(gameID) {
+        /**
+         * Brick colors
+         * @type {string[]}
+         */
+        //colors:string[] = [ 'ygreen', 'blue', 'cyan', 'purple', 'orange' ];
+        this.colors = ['blue'];
         this.attachedBricks = [];
         var wHeight;
         // Create main game paper
@@ -74,6 +80,8 @@ var Base = (function () {
      */
     Base.prototype.attachBrick = function (newBrick) {
         this.attachedBricks.push(newBrick);
+        console.log(this.getAttachedBricksByAnglePos(newBrick.$brick.anglePosition));
+        this.processCombinations();
     };
     /**
      * Return array of attached bricks that fit to given angle
@@ -89,6 +97,73 @@ var Base = (function () {
                 resultArr.push(brick);
         }
         return resultArr;
+    };
+    /**
+     * Check whether there is any color combinations.
+     * If there is - process it.
+     * @return {boolean}
+     */
+    Base.prototype.processCombinations = function () {
+        var filteredBricks;
+        if (this.attachedBricks.length == 0)
+            return false;
+        // Filter all bricks by color
+        filteredBricks = this.filterBricksByColor();
+        for (var color in filteredBricks) {
+            var len = filteredBricks[color].length;
+            var siblings = [];
+            if (len < 3)
+                continue;
+            for (var i = 0; i < len; i++) {
+                siblings = Array.prototype.concat(siblings, this.checkForSiblings(filteredBricks[color], i));
+            }
+            if (siblings.length > 2) {
+                // remove duplicate values
+                // It's expensive calculation, therefore I'm checking that there is more then 2 items in array
+                siblings = Base.UniqArray(siblings);
+            }
+        }
+    };
+    /**
+     * Check whether given brick siblings
+     * @param bricksArray {Brick[]}
+     * @param baseBrickID {number} -index of brick in bricksArray that should be checked
+     */
+    Base.prototype.checkForSiblings = function (bricksArray, baseBrickID) {
+        if (baseBrickID === void 0) { baseBrickID = 0; }
+        var baseBrick = bricksArray[baseBrickID].$brick;
+        var results = [];
+        var nextBrickRadMax = baseBrick.radiusPosition + baseBrick.height + baseBrick.gap;
+        var nextBrickRadMin = baseBrick.radiusPosition - baseBrick.height - baseBrick.gap;
+        var nextBrickAngMax = bricksArray[baseBrickID].normalizeAngle(baseBrick.anglePosition + 360 / this.$base.edgesNum);
+        var nextBrickAngMin = bricksArray[baseBrickID].normalizeAngle(baseBrick.anglePosition - 360 / this.$base.edgesNum);
+        for (var i = 0, len = bricksArray.length; i < len; i++) {
+            var _brick = bricksArray[i].$brick;
+            if ((_brick.radiusPosition == baseBrick.radiusPosition && (_brick.anglePosition <= nextBrickAngMax && _brick.anglePosition >= nextBrickAngMin)) ||
+                (_brick.anglePosition == baseBrick.anglePosition && (_brick.radiusPosition <= nextBrickRadMax && _brick.radiusPosition >= nextBrickRadMin))) {
+                results.push(i);
+            }
+        }
+        if (results.length < 3)
+            results = [];
+        return results;
+    };
+    /**
+     * Filter bricks by color and return object of arrays
+     * @returns {filteredBricks}
+     */
+    Base.prototype.filterBricksByColor = function () {
+        var attachedBricks = this.attachedBricks;
+        var len = attachedBricks.length;
+        var filteredBricks = {};
+        for (var i = 0; i < len; i++) {
+            var brick = attachedBricks[i];
+            var className = brick.$brick.className;
+            if (!filteredBricks.hasOwnProperty(className))
+                filteredBricks[className] = [];
+            filteredBricks[className].push(brick);
+        }
+        return filteredBricks;
     };
     /**
      * Binding keyboard events in order to rotate base
@@ -152,20 +227,36 @@ var Base = (function () {
         }
         return true;
     };
+    /**
+     * Remove duplicate values from tha array
+     *
+     * @source http://stackoverflow.com/a/17903018
+     * @param a {Array}
+     * @returns {Array}
+     */
+    Base.UniqArray = function (a) {
+        return a.reduce(function (p, c) {
+            if (p.indexOf(c) < 0)
+                p.push(c);
+            return p;
+        }, []);
+    };
     return Base;
 })();
 var Brick = (function () {
     /**
      * Object constructor
      * @param base
+     * @param className
      */
-    function Brick(base) {
+    function Brick(base, className) {
+        if (className === void 0) { className = 'ygreen'; }
         var radiusPos = base.$field.radius;
         var edgesNum = base.$base.edgesNum;
         this.$baseObjRef = base;
         this.$brick = {
             brickEl: null,
-            className: 'ygreen',
+            className: className,
             speed: 5,
             radiusPosition: radiusPos,
             height: 20,
@@ -222,8 +313,9 @@ var Brick = (function () {
         y = String(base.baseY);
         if (direction == 'left')
             angle = '-' + angle;
+        // I'm changing angle before animation even starts in order to prevent data collision with falling bricks
+        this.$brick.anglePosition = this.normalizeAngle(this.$brick.anglePosition + parseFloat(angle));
         this.$brick.brickEl.animate({ transform: "r" + angle + "," + x + "," + y }, base.rotationTime, null, function () {
-            _this.$brick.anglePosition = Brick.normalizeAngle(_this.$brick.anglePosition + parseFloat(angle));
             // removing attribute, so I will be able to use it again
             _this.$brick.brickEl.node.removeAttribute('transform');
             // redraw brick in new position
@@ -267,6 +359,27 @@ var Brick = (function () {
         }
     };
     /**
+     * Normalize angle.
+     * Converts -20 to 340.
+     *
+     * @param angle {number}
+     * @returns {number}
+     */
+    Brick.prototype.normalizeAngle = function (angle) {
+        var newAngle;
+        switch (true) {
+            case angle < 0:
+                newAngle = angle + 360;
+                break;
+            case angle >= 360:
+                newAngle = angle - 360;
+                break;
+            default:
+                newAngle = angle;
+        }
+        return newAngle;
+    };
+    /**
      * Return min radius fall for the current brick.
      * Check if there are bricks in the way and calculate where current brick need to stop fall animation.
      *
@@ -286,37 +399,18 @@ var Brick = (function () {
         }
         return minRadius;
     };
-    /**
-     * Normalize angle.
-     * Converts -20 to 340.
-     *
-     * @param angle {number}
-     * @returns {number}
-     */
-    Brick.normalizeAngle = function (angle) {
-        var newAngle;
-        switch (true) {
-            case angle < 0:
-                newAngle = angle + 360;
-                break;
-            case angle > 360:
-                newAngle = angle - 360;
-                break;
-            default:
-                newAngle = angle;
-        }
-        return newAngle;
-    };
     return Brick;
 })();
 /// <reference path="Base_class.ts" />
 /// <reference path="Brick_class.ts" />
 var base = new Base('#game');
+var colors = base.colors;
 var bricksCount = 1;
 new Brick(base);
 var _interval = setInterval(function () {
-    new Brick(base);
-    if (bricksCount++ > 5)
+    var rndColor = colors[Math.floor(Math.random() * colors.length)];
+    new Brick(base, rndColor);
+    if (bricksCount++ > 7)
         clearInterval(_interval);
 }, 1500);
 //# sourceMappingURL=app.js.map

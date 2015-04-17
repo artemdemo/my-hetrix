@@ -2,12 +2,14 @@
 /// <reference path="Brick_class.ts" />
 
 var base = new Base( '#game' );
+var colors:string[] = base.colors;
 
 var bricksCount = 1;
-
 new Brick( base );
 
 var _interval = setInterval(function(){
-    new Brick( base );
-    if ( bricksCount++ > 5 ) clearInterval(_interval);
+    var rndColor = colors[ Math.floor(Math.random() * colors.length) ];
+
+    new Brick( base, rndColor );
+    if ( bricksCount++ > 7 ) clearInterval(_interval);
 }, 1500);

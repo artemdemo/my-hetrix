@@ -1,5 +1,5 @@
 
-interface brickDataConfig {
+interface brickData {
     brickEl: any;
     className: string;
     speed: number; // how much time will take to fall from the start point till the base - will be recalculated if brick was stopped
@@ -13,7 +13,7 @@ class Brick {
 
     $baseObjRef: Base;
 
-    $brick: brickDataConfig;
+    $brick: brickData;
 
     /**
      * Determine whether brick can or can't continue to fall
@@ -23,8 +23,9 @@ class Brick {
     /**
      * Object constructor
      * @param base
+     * @param className
      */
-    constructor( base: Base ) {
+    constructor( base: Base, className:string = 'ygreen' ) {
         var radiusPos = base.$field.radius;
         var edgesNum = base.$base.edgesNum;
 
@@ -32,7 +33,7 @@ class Brick {
 
         this.$brick = {
             brickEl: null,
-            className: 'ygreen',
+            className: className,
             speed: 5,
             radiusPosition: radiusPos,
             height: 20,
@@ -97,13 +98,15 @@ class Brick {
         x = String( base.baseX );
         y = String( base.baseY );
         if ( direction == 'left' ) angle = '-' + angle;
+
+        // I'm changing angle before animation even starts in order to prevent data collision with falling bricks
+        this.$brick.anglePosition = this.normalizeAngle( this.$brick.anglePosition + parseFloat(angle) );
+
         this.$brick.brickEl.animate(
             { transform: "r" + angle + ","+ x +","+ y },
             base.rotationTime,
             null, // easing function
             () => {
-                this.$brick.anglePosition = Brick.normalizeAngle( this.$brick.anglePosition + parseFloat(angle) );
-
                 // removing attribute, so I will be able to use it again
                 this.$brick.brickEl.node.removeAttribute('transform');
 
@@ -158,6 +161,28 @@ class Brick {
     }
 
     /**
+     * Normalize angle.
+     * Converts -20 to 340.
+     *
+     * @param angle {number}
+     * @returns {number}
+     */
+    normalizeAngle ( angle:number ):number {
+        var newAngle: number;
+        switch ( true ) {
+            case angle < 0:
+                newAngle = angle + 360;
+                break;
+            case angle >= 360:
+                newAngle = angle - 360;
+                break;
+            default:
+                newAngle = angle;
+        }
+        return newAngle;
+    }
+
+    /**
      * Return min radius fall for the current brick.
      * Check if there are bricks in the way and calculate where current brick need to stop fall animation.
      *
@@ -180,28 +205,4 @@ class Brick {
 
         return minRadius;
     }
-
-
-    /**
-     * Normalize angle.
-     * Converts -20 to 340.
-     *
-     * @param angle {number}
-     * @returns {number}
-     */
-    private static normalizeAngle ( angle:number ):number {
-        var newAngle: number;
-        switch ( true ) {
-            case angle < 0:
-                newAngle = angle + 360;
-                break;
-            case angle > 360:
-                newAngle = angle - 360;
-                break;
-            default:
-                newAngle = angle;
-        }
-        return newAngle;
-    }
-
 }
