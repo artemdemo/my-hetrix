@@ -5,11 +5,12 @@
 var Base = (function () {
     function Base(gameID) {
         /**
-         * Brick colors
+         * Brick colors.
+         * I'm using function updateColors() in order to set it
+         *
          * @type {string[]}
          */
-        this.colors = ['ygreen', 'blue', 'cyan', 'purple', 'orange'];
-        //colors:string[] = [ 'blue' ];
+        this.colors = [];
         this.attachedBricks = [];
         var wHeight;
         // Create main game paper
@@ -33,6 +34,7 @@ var Base = (function () {
         };
         this.drawBase();
         this.bindEvents();
+        this.updateColors(1);
         this.$score = new Score(this);
     }
     /**
@@ -73,6 +75,27 @@ var Base = (function () {
         }
         else {
             this.$base.baseEl.attr({ d: pathStrBase });
+        }
+    };
+    /**
+     * In order to make it more difficult - I'm adding different colors
+     *
+     * @param level {number}
+     */
+    Base.prototype.updateColors = function (level) {
+        switch (level) {
+            case 0:
+            case 1:
+                this.colors = ['ygreen', 'blue'];
+                break;
+            case 2:
+                this.colors = ['ygreen', 'blue', 'orange'];
+                break;
+            case 3:
+                this.colors = ['ygreen', 'blue', 'purple', 'orange'];
+                break;
+            default:
+                this.colors = ['ygreen', 'blue', 'purple', 'orange', 'cyan'];
         }
     };
     /**
@@ -317,7 +340,7 @@ var Brick = (function () {
         this.$brick = {
             brickEl: null,
             className: className,
-            speed: 6,
+            speed: 5,
             radiusPosition: radiusPos,
             height: 20,
             gap: 3,
@@ -486,9 +509,24 @@ var Score = (function () {
         score.scoreEl.node.setAttribute('x', x);
         score.scoreEl.node.setAttribute('y', y);
     };
+    /**
+     * Updating score base on amount of bricks that has been removed
+     * @param removedBricks
+     */
     Score.prototype.updateScore = function (removedBricks) {
         var score = this.$score;
-        score.currentScore = removedBricks.length;
+        score.currentScore += removedBricks.length;
+        switch (true) {
+            case score.currentScore > 10:
+                this.$baseRefObj.updateColors(2);
+                break;
+            case score.currentScore > 25:
+                this.$baseRefObj.updateColors(3);
+                break;
+            case score.currentScore > 35:
+                this.$baseRefObj.updateColors(4);
+                break;
+        }
         this.drawScore();
     };
     return Score;
@@ -497,13 +535,13 @@ var Score = (function () {
 /// <reference path="Brick_class.ts" />
 /// <reference path="Score_class.ts" />
 var base = new Base('#game');
-var colors = base.colors;
 var bricksCount = 1;
 new Brick(base, 'ygreen', 0);
 var _interval = setInterval(function () {
+    var colors = base.colors;
     var rndColor = colors[Math.floor(Math.random() * colors.length)];
     new Brick(base, rndColor);
-    if (bricksCount++ > 20)
+    if (bricksCount++ > 70)
         clearInterval(_interval);
 }, 1000);
 /*// Test Falling after removing bottom bricks

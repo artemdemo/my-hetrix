@@ -43,10 +43,26 @@ class Score {
         score.scoreEl.node.setAttribute( 'y', y );
     }
 
+    /**
+     * Updating score base on amount of bricks that has been removed
+     * @param removedBricks
+     */
     updateScore( removedBricks: Brick[] ) {
         var score:scoreData = this.$score;
 
-        score.currentScore = removedBricks.length;
+        score.currentScore += removedBricks.length;
+
+        switch ( true ) {
+            case score.currentScore > 10:
+                this.$baseRefObj.updateColors(2);
+                break;
+            case score.currentScore > 25:
+                this.$baseRefObj.updateColors(3);
+                break;
+            case score.currentScore > 35:
+                this.$baseRefObj.updateColors(4);
+                break;
+        }
 
         this.drawScore();
     }

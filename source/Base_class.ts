@@ -44,11 +44,12 @@ class Base {
     $score: Score;
 
     /**
-     * Brick colors
+     * Brick colors.
+     * I'm using function updateColors() in order to set it
+     *
      * @type {string[]}
      */
-    colors:string[] = [ 'ygreen', 'blue', 'cyan', 'purple', 'orange' ];
-    //colors:string[] = [ 'blue' ];
+    colors:string[] = [];
 
     private attachedBricks:Brick[] = [];
 
@@ -80,6 +81,7 @@ class Base {
 
         this.drawBase();
         this.bindEvents();
+        this.updateColors(1);
 
         this.$score = new Score( this );
     }
@@ -132,6 +134,28 @@ class Base {
             this.$base.baseEl.node.id = 'base';
         } else {
             this.$base.baseEl.attr({ d: pathStrBase });
+        }
+    }
+
+    /**
+     * In order to make it more difficult - I'm adding different colors
+     *
+     * @param level {number}
+     */
+    updateColors( level: number ) {
+        switch (level) {
+            case 0:
+            case 1:
+                this.colors = [ 'ygreen', 'blue' ];
+                break;
+            case 2:
+                this.colors = [ 'ygreen', 'blue', 'orange' ];
+                break;
+            case 3:
+                this.colors = [ 'ygreen', 'blue', 'purple', 'orange' ];
+                break;
+            default:
+                this.colors = [ 'ygreen', 'blue', 'purple', 'orange', 'cyan' ];
         }
     }
 
