@@ -53,14 +53,14 @@ class Score {
         score.currentScore += removedBricks.length;
 
         switch ( true ) {
-            case score.currentScore > 10:
-                this.$baseRefObj.updateColors(2);
+            case score.currentScore > 35:
+                this.$baseRefObj.updateColors(4);
                 break;
             case score.currentScore > 25:
                 this.$baseRefObj.updateColors(3);
                 break;
-            case score.currentScore > 35:
-                this.$baseRefObj.updateColors(4);
+            case score.currentScore > 10:
+                this.$baseRefObj.updateColors(2);
                 break;
         }
 

@@ -5,6 +5,11 @@
 var Base = (function () {
     function Base(gameID) {
         /**
+         * Determine whether game is over or not
+         * @type {boolean}
+         */
+        this.gameOver = false;
+        /**
          * Brick colors.
          * I'm using function updateColors() in order to set it
          *
@@ -99,13 +104,14 @@ var Base = (function () {
         }
     };
     /**
-     * Attac new brick to the base
+     * Attach new brick to the base
+     *
      * @param newBrick
      */
     Base.prototype.attachBrick = function (newBrick) {
         this.attachedBricks.push(newBrick);
-        //console.log( this.attachedBricks );
         this.processCombinations();
+        this.checkIfGameOver();
     };
     /**
      * Return array of attached bricks that fit to given angle
@@ -146,6 +152,26 @@ var Base = (function () {
         this.attachedBricks = [];
         for (var i = 0, len = attachedBricks.length; i < len; i++) {
             attachedBricks[i].startFalling();
+        }
+    };
+    /**
+     * Check if ne of brick stacks reached maximum.
+     * If so - set this.gameOver to 'true'
+     */
+    Base.prototype.checkIfGameOver = function () {
+        var filteredBricks;
+        // ToDo: Check if one of brick stacks reached maximum -> game over
+        // Filter all bricks by angle
+        filteredBricks = this.filterBricksByAngle();
+        for (var angle in filteredBricks) {
+            var maxHeight = this.$field.radius;
+            var currentHeight = 0;
+            if (filteredBricks[angle].length > 1) {
+                var brick = filteredBricks[angle][0].$brick;
+                currentHeight = (brick.height + brick.gap) * filteredBricks[angle].length + this.$base.radius;
+            }
+            if (currentHeight >= maxHeight)
+                this.gameOver = true;
         }
     };
     /**
@@ -243,6 +269,23 @@ var Base = (function () {
             if (!filteredBricks.hasOwnProperty(className))
                 filteredBricks[className] = [];
             filteredBricks[className].push(brick);
+        }
+        return filteredBricks;
+    };
+    /**
+     * Filter bricks by angle and return object of arrays
+     * @returns {filteredBricks}
+     */
+    Base.prototype.filterBricksByAngle = function () {
+        var attachedBricks = this.attachedBricks;
+        var len = attachedBricks.length;
+        var filteredBricks = {};
+        for (var i = 0; i < len; i++) {
+            var brick = attachedBricks[i];
+            var angle = String(brick.$brick.anglePosition);
+            if (!filteredBricks.hasOwnProperty(angle))
+                filteredBricks[angle] = [];
+            filteredBricks[angle].push(brick);
         }
         return filteredBricks;
     };
@@ -517,14 +560,14 @@ var Score = (function () {
         var score = this.$score;
         score.currentScore += removedBricks.length;
         switch (true) {
-            case score.currentScore > 10:
-                this.$baseRefObj.updateColors(2);
+            case score.currentScore > 35:
+                this.$baseRefObj.updateColors(4);
                 break;
             case score.currentScore > 25:
                 this.$baseRefObj.updateColors(3);
                 break;
-            case score.currentScore > 35:
-                this.$baseRefObj.updateColors(4);
+            case score.currentScore > 10:
+                this.$baseRefObj.updateColors(2);
                 break;
         }
         this.drawScore();
@@ -541,8 +584,10 @@ var _interval = setInterval(function () {
     var colors = base.colors;
     var rndColor = colors[Math.floor(Math.random() * colors.length)];
     new Brick(base, rndColor);
-    if (bricksCount++ > 70)
+    if (!!base.gameOver) {
+        console.log('GAME OVER');
         clearInterval(_interval);
+    }
 }, 1000);
 /*// Test Falling after removing bottom bricks
 var _interval = setInterval(function(){

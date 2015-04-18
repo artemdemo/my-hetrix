@@ -4,7 +4,6 @@
 
 var base = new Base( '#game' );
 
-
 var bricksCount = 1;
 new Brick( base, 'ygreen', 0 );
 
@@ -13,7 +12,10 @@ var _interval = setInterval(function(){
     var rndColor = colors[ Math.floor(Math.random() * colors.length) ];
 
     new Brick( base, rndColor );
-    if ( bricksCount++ > 70 ) clearInterval(_interval);
+    if ( !! base.gameOver ) {
+        console.log( 'GAME OVER' );
+        clearInterval(_interval)
+    }
 }, 1000);
 
 /*// Test Falling after removing bottom bricks

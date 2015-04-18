@@ -19,7 +19,7 @@ interface fieldData {
 }
 
 interface filteredBricks {
-    [color: string]: Brick[]
+    [key: string]: Brick[];
 }
 
 /**
@@ -41,7 +41,16 @@ class Base {
      */
     $field: fieldData;
 
+    /**
+     * Score instance
+     */
     $score: Score;
+
+    /**
+     * Determine whether game is over or not
+     * @type {boolean}
+     */
+    gameOver: boolean = false;
 
     /**
      * Brick colors.
@@ -160,13 +169,15 @@ class Base {
     }
 
     /**
-     * Attac new brick to the base
+     * Attach new brick to the base
+     *
      * @param newBrick
      */
     attachBrick( newBrick: Brick ) {
         this.attachedBricks.push( newBrick );
-        //console.log( this.attachedBricks );
         this.processCombinations();
+
+        this.checkIfGameOver();
     }
 
     /**
@@ -211,6 +222,28 @@ class Base {
         this.attachedBricks = [];
         for (var i=0, len=attachedBricks.length; i<len; i++) {
             attachedBricks[i].startFalling();
+        }
+    }
+
+    /**
+     * Check if ne of brick stacks reached maximum.
+     * If so - set this.gameOver to 'true'
+     */
+    private checkIfGameOver() {
+        var filteredBricks: filteredBricks;
+        // ToDo: Check if one of brick stacks reached maximum -> game over
+
+        // Filter all bricks by angle
+        filteredBricks = this.filterBricksByAngle();
+
+        for ( var angle in filteredBricks ) {
+            var maxHeight:number = this.$field.radius;
+            var currentHeight:number = 0;
+            if ( filteredBricks[angle].length > 1 ) {
+                var brick = filteredBricks[angle][0].$brick;
+                currentHeight = ( brick.height + brick.gap ) * filteredBricks[angle].length + this.$base.radius;
+            }
+            if ( currentHeight >= maxHeight ) this.gameOver = true;
         }
     }
 
@@ -327,6 +360,26 @@ class Base {
         }
 
         return filteredBricks;
+    }
+
+    /**
+     * Filter bricks by angle and return object of arrays
+     * @returns {filteredBricks}
+     */
+    private filterBricksByAngle():filteredBricks {
+        var attachedBricks = this.attachedBricks;
+        var len = attachedBricks.length;
+        var filteredBricks: filteredBricks = {};
+
+        for ( var i=0; i<len; i++ ) {
+            var brick:Brick = attachedBricks[i];
+            var angle:string = String( brick.$brick.anglePosition );
+
+            if ( ! filteredBricks.hasOwnProperty( angle ) ) filteredBricks[ angle ] = [];
+            filteredBricks[ angle ].push( brick );
+        }
+
+        return filteredBricks
     }
 
     /**
