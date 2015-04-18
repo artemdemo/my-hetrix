@@ -41,6 +41,8 @@ class Base {
      */
     $field: fieldData;
 
+    $score: Score;
+
     /**
      * Brick colors
      * @type {string[]}
@@ -78,6 +80,8 @@ class Base {
 
         this.drawBase();
         this.bindEvents();
+
+        this.$score = new Score( this );
     }
 
     /**
@@ -214,15 +218,25 @@ class Base {
 
                 // Again need to check that there is more then 2 items in array, after duplicates were removed
                 if ( siblings.length > 2 ) {
+                    var removedBricks:Brick[] = [];
 
                     for (var i=0, len=siblings.length; i<len; i++) {
                         var brick:Brick = filteredBricks[color][ siblings[i] ];
 
-                        // ToDo: Add some animation (like opacity)
+                        removedBricks.push(brick); // I'll need them to calculate score
 
-                        brick.$brick.brickEl.attr({ d: '' });
+                        brick.$brick.brickEl.node.setAttribute( 'class', brick.$brick.brickEl.node.getAttribute('class') + ' remove' );
+
+                        (function(brick){
+                            setTimeout(function(){
+                                brick.$brick.brickEl.attr({ d: '' });
+                            }, 1000);
+                        })(brick);
+
                         this.removeAttachedBrickByID( brick.$brick.brickEl.id );
                     }
+
+                    this.$score.updateScore( removedBricks );
 
                     this.closeBrickGap();
                 }

@@ -11,6 +11,7 @@ body {
 #field {
   fill: #EFEFEF;
 }
+/*-------------- Bricks ------------------*/
 .ygreen {
   fill: #448c0a;
 }
@@ -25,4 +26,18 @@ body {
 }
 .orange {
   fill: #DB8D25;
+}
+.brick {
+  opacity: 1;
+  -webkit-transition: 0.5s;
+  transition: 0.5s;
+}
+.brick.remove {
+  opacity: 0;
+}
+/*------------- Score ---------------------*/
+.base-score {
+  fill: white;
+  font-family: Arial, sans-serif;
+  font-size: 40px;
 }

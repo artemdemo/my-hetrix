@@ -33,6 +33,7 @@ var Base = (function () {
         };
         this.drawBase();
         this.bindEvents();
+        this.$score = new Score(this);
     }
     /**
      * Drawing the main control element of the game
@@ -149,12 +150,19 @@ var Base = (function () {
                 siblings = Base.UniqArray(siblings);
                 // Again need to check that there is more then 2 items in array, after duplicates were removed
                 if (siblings.length > 2) {
+                    var removedBricks = [];
                     for (var i = 0, len = siblings.length; i < len; i++) {
                         var brick = filteredBricks[color][siblings[i]];
-                        // ToDo: Add some animation (like opacity)
-                        brick.$brick.brickEl.attr({ d: '' });
+                        removedBricks.push(brick); // I'll need them to calculate score
+                        brick.$brick.brickEl.node.setAttribute('class', brick.$brick.brickEl.node.getAttribute('class') + ' remove');
+                        (function (brick) {
+                            setTimeout(function () {
+                                brick.$brick.brickEl.attr({ d: '' });
+                            }, 1000);
+                        })(brick);
                         this.removeAttachedBrickByID(brick.$brick.brickEl.id);
                     }
+                    this.$score.updateScore(removedBricks);
                     this.closeBrickGap();
                 }
             }
@@ -309,7 +317,7 @@ var Brick = (function () {
         this.$brick = {
             brickEl: null,
             className: className,
-            speed: 3,
+            speed: 6,
             radiusPosition: radiusPos,
             height: 20,
             gap: 3,
@@ -324,7 +332,6 @@ var Brick = (function () {
     Brick.prototype.startFalling = function () {
         var _this = this;
         var last = +new Date();
-        // ToDo: speed need to be recalculated after stopping
         var speed = this.$brick.speed;
         var currentRadiusPos = this.$brick.radiusPosition;
         this.activeFalling = true;
@@ -398,7 +405,7 @@ var Brick = (function () {
         if (this.$brick.brickEl == null) {
             // If there is no brick element - creating one
             this.$brick.brickEl = this.$baseObjRef.$gamePaper.path(brickPath);
-            this.$brick.brickEl.node.setAttribute('class', this.$brick.className);
+            this.$brick.brickEl.node.setAttribute('class', 'brick ' + this.$brick.className);
         }
         else {
             // If it exists - changing path
@@ -455,9 +462,34 @@ var Brick = (function () {
 })();
 var Score = (function () {
     function Score(base) {
+        this.$baseRefObj = base;
+        this.$score = {
+            scoreEl: null,
+            currentScore: 0,
+            currentSpeed: 5
+        };
         this.drawScore();
     }
     Score.prototype.drawScore = function () {
+        var score = this.$score;
+        var x = this.$baseRefObj.$base.baseX;
+        var y = this.$baseRefObj.$base.baseY;
+        // I need to draw text node in order to calculate it's dimensions
+        if (score.scoreEl == null)
+            score.scoreEl = this.$baseRefObj.$gamePaper.text(x, y, String(score.currentScore));
+        else
+            score.scoreEl.node.innerHTML = String(score.currentScore);
+        score.scoreEl.node.setAttribute('class', 'base-score');
+        // Now I can get it's real size
+        x = x - score.scoreEl.node.clientWidth / 2;
+        y = y + score.scoreEl.node.clientHeight / 4;
+        score.scoreEl.node.setAttribute('x', x);
+        score.scoreEl.node.setAttribute('y', y);
+    };
+    Score.prototype.updateScore = function (removedBricks) {
+        var score = this.$score;
+        score.currentScore = removedBricks.length;
+        this.drawScore();
     };
     return Score;
 })();
@@ -471,11 +503,10 @@ new Brick(base, 'ygreen', 0);
 var _interval = setInterval(function () {
     var rndColor = colors[Math.floor(Math.random() * colors.length)];
     new Brick(base, rndColor);
-    if (bricksCount++ > 10)
+    if (bricksCount++ > 20)
         clearInterval(_interval);
 }, 1000);
-/*
-// Test Falling after removing bottom bricks
+/*// Test Falling after removing bottom bricks
 var _interval = setInterval(function(){
     if ( bricksCount < 3 ) new Brick( base, 'blue', 60 );
     else if ( bricksCount == 3 ) new Brick( base, 'orange', 60 );

@@ -35,7 +35,7 @@ class Brick {
         this.$brick = {
             brickEl: null,
             className: className,
-            speed: 3,
+            speed: 6,
             radiusPosition: radiusPos,
             height: 20,
             gap: 3,
@@ -52,7 +52,6 @@ class Brick {
      */
     startFalling() {
         var last = +new Date();
-        // ToDo: speed need to be recalculated after stopping
         var speed = this.$brick.speed;
         var currentRadiusPos = this.$brick.radiusPosition;
 
@@ -148,7 +147,8 @@ class Brick {
         if ( this.$brick.brickEl == null ) {
             // If there is no brick element - creating one
             this.$brick.brickEl = this.$baseObjRef.$gamePaper.path( brickPath );
-            this.$brick.brickEl.node.setAttribute( 'class', this.$brick.className );
+            this.$brick.brickEl.node.setAttribute( 'class', 'brick ' + this.$brick.className );
+
         } else {
             // If it exists - changing path
             this.$brick.brickEl.attr({ d: brickPath });
