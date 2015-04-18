@@ -45,8 +45,8 @@ class Base {
      * Brick colors
      * @type {string[]}
      */
-    //colors:string[] = [ 'ygreen', 'blue', 'cyan', 'purple', 'orange' ];
-    colors:string[] = [ 'blue' ];
+    colors:string[] = [ 'ygreen', 'blue', 'cyan', 'purple', 'orange' ];
+    //colors:string[] = [ 'blue' ];
 
     private attachedBricks:Brick[] = [];
 
@@ -137,6 +137,7 @@ class Base {
      */
     attachBrick( newBrick: Brick ) {
         this.attachedBricks.push( newBrick );
+        //console.log( this.attachedBricks );
         this.processCombinations();
     }
 
@@ -200,13 +201,15 @@ class Base {
 
                 // Again need to check that there is more then 2 items in array, after duplicates were removed
                 if ( siblings.length > 2 ) {
+
                     for (var i=0, len=siblings.length; i<len; i++) {
                         var brick:Brick = filteredBricks[color][ siblings[i] ];
+
                         // ToDo: Add some animation (like opacity)
+
                         brick.$brick.brickEl.attr({ d: '' });
                         this.removeAttachedBrickByID( brick.$brick.brickEl.id );
                     }
-                    console.log( this.attachedBricks );
                 }
             }
 
@@ -228,14 +231,26 @@ class Base {
 
         for ( var i=0, len=bricksArray.length; i<len; i++ ) {
             var _brick:brickData = bricksArray[i].$brick;
-            if (
-                ( _brick.radiusPosition == baseBrick.radiusPosition && ( _brick.anglePosition <= nextBrickAngMax && _brick.anglePosition >= nextBrickAngMin ) ) ||
-                ( _brick.anglePosition == baseBrick.anglePosition && ( _brick.radiusPosition <= nextBrickRadMax && _brick.radiusPosition >= nextBrickRadMin ) )
-            ) {
+            var _angle:number = bricksArray[baseBrickID].normalizeAngle( _brick.anglePosition );
+
+            if ( _brick.radiusPosition == baseBrick.radiusPosition ) {
+                // Because I'm working with circle - nextBrickAngMin can be bigger then nextBrickAngMax
+                // For example nextBrickAngMin is 360 and nextBrickAngMax is 60
+                // It's mean that comparison should work through 0
+                if ( nextBrickAngMin < nextBrickAngMax && ( _angle <= nextBrickAngMax && _angle >= nextBrickAngMin ) ) {
+                    results.push( i );
+                } else if ( nextBrickAngMin > nextBrickAngMax ) {
+                    if ((_angle >= 0 && _angle <= nextBrickAngMax) || ( _angle <= 360 && _angle >= nextBrickAngMin )) {
+                        results.push(i);
+                    }
+                }
+            }
+            if ( _angle == baseBrick.anglePosition && ( _brick.radiusPosition <= nextBrickRadMax && _brick.radiusPosition >= nextBrickRadMin ) ) {
                 results.push( i );
             }
         }
 
+        results = Base.UniqArray( results );
         if ( results.length < 3 ) results = [];
 
         return results;

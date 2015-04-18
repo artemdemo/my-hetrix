@@ -5,11 +5,11 @@ var base = new Base( '#game' );
 var colors:string[] = base.colors;
 
 var bricksCount = 1;
-new Brick( base );
+new Brick( base, 'ygreen', 0 );
 
 var _interval = setInterval(function(){
     var rndColor = colors[ Math.floor(Math.random() * colors.length) ];
 
     new Brick( base, rndColor );
-    if ( bricksCount++ > 2 ) clearInterval(_interval);
-}, 1500);
+    if ( bricksCount++ > 10 ) clearInterval(_interval);
+}, 1000);

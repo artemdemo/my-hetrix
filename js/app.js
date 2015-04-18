@@ -8,8 +8,8 @@ var Base = (function () {
          * Brick colors
          * @type {string[]}
          */
-        //colors:string[] = [ 'ygreen', 'blue', 'cyan', 'purple', 'orange' ];
-        this.colors = ['blue'];
+        this.colors = ['ygreen', 'blue', 'cyan', 'purple', 'orange'];
+        //colors:string[] = [ 'blue' ];
         this.attachedBricks = [];
         var wHeight;
         // Create main game paper
@@ -80,6 +80,7 @@ var Base = (function () {
      */
     Base.prototype.attachBrick = function (newBrick) {
         this.attachedBricks.push(newBrick);
+        //console.log( this.attachedBricks );
         this.processCombinations();
     };
     /**
@@ -142,7 +143,6 @@ var Base = (function () {
                         brick.$brick.brickEl.attr({ d: '' });
                         this.removeAttachedBrickByID(brick.$brick.brickEl.id);
                     }
-                    console.log(this.attachedBricks);
                 }
             }
         }
@@ -162,11 +162,25 @@ var Base = (function () {
         var nextBrickAngMin = bricksArray[baseBrickID].normalizeAngle(baseBrick.anglePosition - 360 / this.$base.edgesNum);
         for (var i = 0, len = bricksArray.length; i < len; i++) {
             var _brick = bricksArray[i].$brick;
-            if ((_brick.radiusPosition == baseBrick.radiusPosition && (_brick.anglePosition <= nextBrickAngMax && _brick.anglePosition >= nextBrickAngMin)) ||
-                (_brick.anglePosition == baseBrick.anglePosition && (_brick.radiusPosition <= nextBrickRadMax && _brick.radiusPosition >= nextBrickRadMin))) {
+            var _angle = bricksArray[baseBrickID].normalizeAngle(_brick.anglePosition);
+            if (_brick.radiusPosition == baseBrick.radiusPosition) {
+                // Because I'm working with circle - nextBrickAngMin can be bigger then nextBrickAngMax
+                // For example nextBrickAngMin is 360 and nextBrickAngMax is 60
+                // It's mean that comparison should work through 0
+                if (nextBrickAngMin < nextBrickAngMax && (_angle <= nextBrickAngMax && _angle >= nextBrickAngMin)) {
+                    results.push(i);
+                }
+                else if (nextBrickAngMin > nextBrickAngMax) {
+                    if ((_angle >= 0 && _angle <= nextBrickAngMax) || (_angle <= 360 && _angle >= nextBrickAngMin)) {
+                        results.push(i);
+                    }
+                }
+            }
+            if (_angle == baseBrick.anglePosition && (_brick.radiusPosition <= nextBrickRadMax && _brick.radiusPosition >= nextBrickRadMin)) {
                 results.push(i);
             }
         }
+        results = Base.UniqArray(results);
         if (results.length < 3)
             results = [];
         return results;
@@ -270,10 +284,12 @@ var Brick = (function () {
     /**
      * Object constructor
      * @param base
-     * @param className
+     * @param className {string} - optional
+     * @param anglePosition {number}
      */
-    function Brick(base, className) {
+    function Brick(base, className, anglePosition) {
         if (className === void 0) { className = 'ygreen'; }
+        if (anglePosition === void 0) { anglePosition = -1; }
         var radiusPos = base.$field.radius;
         var edgesNum = base.$base.edgesNum;
         this.$baseObjRef = base;
@@ -284,7 +300,7 @@ var Brick = (function () {
             radiusPosition: radiusPos,
             height: 20,
             gap: 3,
-            anglePosition: 360 / edgesNum * Math.floor(Math.random() * edgesNum) // random number between 0 and edges amount
+            anglePosition: anglePosition > -1 ? anglePosition : 360 / edgesNum * Math.floor(Math.random() * edgesNum) // random number between 0 and edges amount
         };
         this.drawBrick(radiusPos);
         this.startFalling();
@@ -429,11 +445,11 @@ var Brick = (function () {
 var base = new Base('#game');
 var colors = base.colors;
 var bricksCount = 1;
-new Brick(base);
+new Brick(base, 'ygreen', 0);
 var _interval = setInterval(function () {
     var rndColor = colors[Math.floor(Math.random() * colors.length)];
     new Brick(base, rndColor);
-    if (bricksCount++ > 2)
+    if (bricksCount++ > 10)
         clearInterval(_interval);
-}, 1500);
+}, 1000);
 //# sourceMappingURL=app.js.map

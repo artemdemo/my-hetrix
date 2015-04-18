@@ -23,9 +23,10 @@ class Brick {
     /**
      * Object constructor
      * @param base
-     * @param className
+     * @param className {string} - optional
+     * @param anglePosition {number}
      */
-    constructor( base: Base, className:string = 'ygreen' ) {
+    constructor( base: Base, className:string = 'ygreen', anglePosition:number = -1 ) {
         var radiusPos = base.$field.radius;
         var edgesNum = base.$base.edgesNum;
 
@@ -38,7 +39,7 @@ class Brick {
             radiusPosition: radiusPos,
             height: 20,
             gap: 3,
-            anglePosition: 360 / edgesNum * Math.floor(Math.random() * edgesNum) // random number between 0 and edges amount
+            anglePosition: anglePosition > -1 ? anglePosition : 360 / edgesNum * Math.floor(Math.random() * edgesNum) // random number between 0 and edges amount
         };
 
         this.drawBrick( radiusPos );
