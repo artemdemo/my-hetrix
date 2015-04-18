@@ -135,6 +135,10 @@ class Base {
             pathStrField += "L " + String(x_field) + "," + String(y_field) + " ";
         }
 
+        // base abd field should have closed path
+        pathStrBase += "z";
+        pathStrField += "z";
+
         if ( this.$base.baseEl == null ) {
             this.$field.fieldEl = this.$gamePaper.path( pathStrField );
             this.$field.fieldEl.node.id = 'field';
@@ -166,6 +170,12 @@ class Base {
             default:
                 this.colors = [ 'ygreen', 'blue', 'purple', 'orange', 'cyan' ];
         }
+    }
+
+    setNextBrickColor( nextColor:string ) {
+        var fieldNode = this.$field.fieldEl.node;
+        // ToDo: I don't like this solution - add hexagon to the right bottom side - it will suggest next color
+        //fieldNode.setAttribute('class', nextColor);
     }
 
     /**

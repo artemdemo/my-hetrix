@@ -12,10 +12,26 @@ body {
 }
 #field {
   fill: #EFEFEF;
+  stroke-width: 2px;
+}
+#field.ygreen {
+  stroke: #448C0A;
+}
+#field.blue {
+  stroke: #2F62B2;
+}
+#field.cyan {
+  stroke: #17B4BA;
+}
+#field.purple {
+  stroke: #9034BD;
+}
+#field.orange {
+  stroke: #DB8D25;
 }
 /*-------------- Bricks ------------------*/
 .ygreen {
-  fill: #448c0a;
+  fill: #448C0A;
 }
 .blue {
   fill: #2F62B2;

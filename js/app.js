@@ -72,6 +72,9 @@ var Base = (function () {
             y_field = this.$base.baseY + fieldRadius * Math.sin(Math.PI * angle / 180);
             pathStrField += "L " + String(x_field) + "," + String(y_field) + " ";
         }
+        // base abd field should have closed path
+        pathStrBase += "z";
+        pathStrField += "z";
         if (this.$base.baseEl == null) {
             this.$field.fieldEl = this.$gamePaper.path(pathStrField);
             this.$field.fieldEl.node.id = 'field';
@@ -102,6 +105,11 @@ var Base = (function () {
             default:
                 this.colors = ['ygreen', 'blue', 'purple', 'orange', 'cyan'];
         }
+    };
+    Base.prototype.setNextBrickColor = function (nextColor) {
+        var fieldNode = this.$field.fieldEl.node;
+        // ToDo: I don't like this solution - add hexagon to the right bottom side - it will suggest next color
+        //fieldNode.setAttribute('class', nextColor);
     };
     /**
      * Attach new brick to the base
@@ -578,19 +586,22 @@ var Score = (function () {
 /// <reference path="Brick_class.ts" />
 /// <reference path="Score_class.ts" />
 var base = new Base('#game');
-var bricksCount = 1;
 new Brick(base, 'ygreen', 0);
+var nextColor = base.colors[Math.floor(Math.random() * base.colors.length)];
+base.setNextBrickColor(nextColor);
 var _interval = setInterval(function () {
     var colors = base.colors;
-    var rndColor = colors[Math.floor(Math.random() * colors.length)];
-    new Brick(base, rndColor);
+    new Brick(base, nextColor);
     if (!!base.gameOver) {
         var $gameOver = document.getElementById('game-over');
         $gameOver.className += ' show';
         clearInterval(_interval);
     }
+    nextColor = colors[Math.floor(Math.random() * colors.length)];
+    base.setNextBrickColor(nextColor);
 }, 1000);
 /*// Test Falling after removing bottom bricks
+ var bricksCount = 1;
 var _interval = setInterval(function(){
     if ( bricksCount < 3 ) new Brick( base, 'blue', 60 );
     else if ( bricksCount == 3 ) new Brick( base, 'orange', 60 );
