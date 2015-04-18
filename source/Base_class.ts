@@ -174,6 +174,19 @@ class Base {
     }
 
     /**
+     * After removing bricks could appear gap - other colors could be up the group of same color
+     * I need to close this gap
+     */
+    closeBrickGap() {
+        var attachedBricks = this.attachedBricks;
+        // I'm removing all attached brick, case I want to make them all to fall
+        this.attachedBricks = [];
+        for (var i=0, len=attachedBricks.length; i<len; i++) {
+            attachedBricks[i].startFalling();
+        }
+    }
+
+    /**
      * Check whether there is any color combinations.
      * If there is - process it.
      * @return {boolean}
@@ -210,6 +223,8 @@ class Base {
                         brick.$brick.brickEl.attr({ d: '' });
                         this.removeAttachedBrickByID( brick.$brick.brickEl.id );
                     }
+
+                    this.closeBrickGap();
                 }
             }
 

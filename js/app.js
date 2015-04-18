@@ -113,6 +113,18 @@ var Base = (function () {
         return false;
     };
     /**
+     * After removing bricks could appear gap - other colors could be up the group of same color
+     * I need to close this gap
+     */
+    Base.prototype.closeBrickGap = function () {
+        var attachedBricks = this.attachedBricks;
+        // I'm removing all attached brick, case I want to make them all to fall
+        this.attachedBricks = [];
+        for (var i = 0, len = attachedBricks.length; i < len; i++) {
+            attachedBricks[i].startFalling();
+        }
+    };
+    /**
      * Check whether there is any color combinations.
      * If there is - process it.
      * @return {boolean}
@@ -143,6 +155,7 @@ var Base = (function () {
                         brick.$brick.brickEl.attr({ d: '' });
                         this.removeAttachedBrickByID(brick.$brick.brickEl.id);
                     }
+                    this.closeBrickGap();
                 }
             }
         }
@@ -296,7 +309,7 @@ var Brick = (function () {
         this.$brick = {
             brickEl: null,
             className: className,
-            speed: 5,
+            speed: 3,
             radiusPosition: radiusPos,
             height: 20,
             gap: 3,
@@ -440,8 +453,17 @@ var Brick = (function () {
     };
     return Brick;
 })();
+var Score = (function () {
+    function Score(base) {
+        this.drawScore();
+    }
+    Score.prototype.drawScore = function () {
+    };
+    return Score;
+})();
 /// <reference path="Base_class.ts" />
 /// <reference path="Brick_class.ts" />
+/// <reference path="Score_class.ts" />
 var base = new Base('#game');
 var colors = base.colors;
 var bricksCount = 1;
@@ -452,4 +474,14 @@ var _interval = setInterval(function () {
     if (bricksCount++ > 10)
         clearInterval(_interval);
 }, 1000);
+/*
+// Test Falling after removing bottom bricks
+var _interval = setInterval(function(){
+    if ( bricksCount < 3 ) new Brick( base, 'blue', 60 );
+    else if ( bricksCount == 3 ) new Brick( base, 'orange', 60 );
+    else if ( bricksCount == 4 ) new Brick( base, 'purple', 60 );
+    else new Brick( base, 'blue', 120 );
+
+    if ( bricksCount++ > 5 ) clearInterval(_interval);
+}, 1000);*/
 //# sourceMappingURL=app.js.map

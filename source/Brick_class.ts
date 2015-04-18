@@ -35,7 +35,7 @@ class Brick {
         this.$brick = {
             brickEl: null,
             className: className,
-            speed: 5,
+            speed: 3,
             radiusPosition: radiusPos,
             height: 20,
             gap: 3,
