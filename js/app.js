@@ -585,7 +585,8 @@ var _interval = setInterval(function () {
     var rndColor = colors[Math.floor(Math.random() * colors.length)];
     new Brick(base, rndColor);
     if (!!base.gameOver) {
-        console.log('GAME OVER');
+        var $gameOver = document.getElementById('game-over');
+        $gameOver.className += ' show';
         clearInterval(_interval);
     }
 }, 1000);

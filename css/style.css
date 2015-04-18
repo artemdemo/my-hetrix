@@ -1,7 +1,9 @@
 body {
   margin: 0;
   padding: 0;
+  font-family: Arial, sans-serif;
 }
+/*-------------- Basic -------------------*/
 #game {
   width: 100%;
 }
@@ -38,6 +40,27 @@ body {
 /*------------- Score ---------------------*/
 .base-score {
   fill: white;
-  font-family: Arial, sans-serif;
   font-size: 40px;
+}
+/*------------- Game Over -------------------*/
+#game-over {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  opacity: 0;
+  -webkit-transition: 0.5s;
+  transition: 0.5s;
+}
+#game-over .text {
+  color: #dbdbdb;
+  margin-top: 36%;
+  text-align: center;
+  font-size: 140px;
+  text-shadow: 0 0 79px black;
+}
+#game-over.show {
+  opacity: 1;
 }
