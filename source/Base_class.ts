@@ -137,7 +137,6 @@ class Base {
      */
     attachBrick( newBrick: Brick ) {
         this.attachedBricks.push( newBrick );
-        console.log( this.getAttachedBricksByAnglePos( newBrick.$brick.anglePosition ) );
         this.processCombinations();
     }
 
@@ -156,6 +155,21 @@ class Base {
         }
 
         return resultArr;
+    }
+
+    /**
+     * Remove brick by it's unique ID
+     * @param id {string}
+     */
+    removeAttachedBrickByID ( id: string ) {
+        // ToDO: remove also from DOM?
+        for (var i=0, len=this.attachedBricks.length; i<len; i++) {
+            if ( this.attachedBricks[i].$brick.brickEl.id == id ) {
+                this.attachedBricks.splice(i, 1);
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -183,6 +197,17 @@ class Base {
                 // remove duplicate values
                 // It's expensive calculation, therefore I'm checking that there is more then 2 items in array
                 siblings = Base.UniqArray(siblings);
+
+                // Again need to check that there is more then 2 items in array, after duplicates were removed
+                if ( siblings.length > 2 ) {
+                    for (var i=0, len=siblings.length; i<len; i++) {
+                        var brick:Brick = filteredBricks[color][ siblings[i] ];
+                        // ToDo: Add some animation (like opacity)
+                        brick.$brick.brickEl.attr({ d: '' });
+                        this.removeAttachedBrickByID( brick.$brick.brickEl.id );
+                    }
+                    console.log( this.attachedBricks );
+                }
             }
 
         }

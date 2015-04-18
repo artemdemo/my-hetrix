@@ -11,5 +11,5 @@ var _interval = setInterval(function(){
     var rndColor = colors[ Math.floor(Math.random() * colors.length) ];
 
     new Brick( base, rndColor );
-    if ( bricksCount++ > 7 ) clearInterval(_interval);
+    if ( bricksCount++ > 2 ) clearInterval(_interval);
 }, 1500);

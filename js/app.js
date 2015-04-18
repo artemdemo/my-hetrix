@@ -80,7 +80,6 @@ var Base = (function () {
      */
     Base.prototype.attachBrick = function (newBrick) {
         this.attachedBricks.push(newBrick);
-        console.log(this.getAttachedBricksByAnglePos(newBrick.$brick.anglePosition));
         this.processCombinations();
     };
     /**
@@ -97,6 +96,20 @@ var Base = (function () {
                 resultArr.push(brick);
         }
         return resultArr;
+    };
+    /**
+     * Remove brick by it's unique ID
+     * @param id {string}
+     */
+    Base.prototype.removeAttachedBrickByID = function (id) {
+        // ToDO: remove also from DOM?
+        for (var i = 0, len = this.attachedBricks.length; i < len; i++) {
+            if (this.attachedBricks[i].$brick.brickEl.id == id) {
+                this.attachedBricks.splice(i, 1);
+                return true;
+            }
+        }
+        return false;
     };
     /**
      * Check whether there is any color combinations.
@@ -121,6 +134,16 @@ var Base = (function () {
                 // remove duplicate values
                 // It's expensive calculation, therefore I'm checking that there is more then 2 items in array
                 siblings = Base.UniqArray(siblings);
+                // Again need to check that there is more then 2 items in array, after duplicates were removed
+                if (siblings.length > 2) {
+                    for (var i = 0, len = siblings.length; i < len; i++) {
+                        var brick = filteredBricks[color][siblings[i]];
+                        // ToDo: Add some animation (like opacity)
+                        brick.$brick.brickEl.attr({ d: '' });
+                        this.removeAttachedBrickByID(brick.$brick.brickEl.id);
+                    }
+                    console.log(this.attachedBricks);
+                }
             }
         }
     };
@@ -410,7 +433,7 @@ new Brick(base);
 var _interval = setInterval(function () {
     var rndColor = colors[Math.floor(Math.random() * colors.length)];
     new Brick(base, rndColor);
-    if (bricksCount++ > 7)
+    if (bricksCount++ > 2)
         clearInterval(_interval);
 }, 1500);
 //# sourceMappingURL=app.js.map
