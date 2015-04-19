@@ -35,9 +35,9 @@ class Brick {
         this.$brick = {
             brickEl: null,
             className: className,
-            speed: 5,
+            speed: base.isMobile() ? 10 : 5,
             radiusPosition: radiusPos,
-            height: 20,
+            height: base.isMobile() ? 10 : 20,
             gap: 3,
             anglePosition: anglePosition > -1 ? anglePosition : 360 / edgesNum * Math.floor(Math.random() * edgesNum) // random number between 0 and edges amount
         };

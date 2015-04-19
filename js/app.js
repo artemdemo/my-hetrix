@@ -17,28 +17,33 @@ var Base = (function () {
          */
         this.colors = [];
         this.attachedBricks = [];
-        var wHeight;
+        var wHeight, wWidth;
         // Create main game paper
         this.$gamePaper = Snap(gameID);
         // calculate height of the paper
         wHeight = window.innerHeight - 10;
+        wWidth = window.innerWidth;
         this.$gamePaper.node.style.height = wHeight + '.px';
+        this.$gamePaper.node.style.width = wWidth + '.px';
+        this.$field = {
+            fieldEl: null,
+            radius: this.calculateFieldRadius(wWidth, wHeight)
+        };
         // Setting up basic data about control hexagon element
         this.$base = {
             baseEl: null,
-            baseX: window.innerWidth / 2,
-            baseY: window.innerHeight / 2,
-            rotationTime: 100,
-            radius: 100,
+            baseX: wWidth / 2,
+            baseY: wHeight / 2,
+            rotationTime: this.isMobile() ? 65 : 100,
+            radius: this.$field.radius / 4.2,
             edgesNum: 6,
             startAngle: 0
         };
-        this.$field = {
-            fieldEl: null,
-            radius: this.$base.radius * 4.5
-        };
         this.drawBase();
-        this.bindEvents();
+        if (this.isMobile())
+            this.addControllers();
+        else
+            this.bindEvents();
         this.updateColors(1);
         this.$score = new Score(this);
     }
@@ -314,6 +319,30 @@ var Base = (function () {
         }, false);
     };
     /**
+     * In case game was opened from mobile I need to add controllers
+     */
+    Base.prototype.addControllers = function () {
+        var _this = this;
+        var left = 50;
+        var bottom = 60;
+        var radius = 30;
+        var wWidth = window.innerWidth;
+        var wHeight = window.innerHeight;
+        var leftCircle = this.$gamePaper.circle(left, wHeight - bottom, radius);
+        var rightCircle = this.$gamePaper.circle(wWidth - left, wHeight - bottom, radius);
+        leftCircle
+            .addClass('controller')
+            .click(function () {
+            _this.fireLeft();
+        });
+        console.log(rightCircle);
+        rightCircle
+            .addClass('controller')
+            .click(function () {
+            _this.fireRight();
+        });
+    };
+    /**
      * Actions in case LEFT arrow was clicked
      */
     Base.prototype.fireLeft = function () {
@@ -326,6 +355,14 @@ var Base = (function () {
     Base.prototype.fireRight = function () {
         this.rotateBase('right');
         this.rotateBricks('right');
+    };
+    /**
+     * Check whether device is mobile or not
+     *
+     * @returns {boolean}
+     */
+    Base.prototype.isMobile = function () {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     };
     /**
      * Rotate base
@@ -359,6 +396,19 @@ var Base = (function () {
         }
         return true;
     };
+    Base.prototype.calculateFieldRadius = function (wWidth, wHeight) {
+        var radius;
+        if (this.isMobile()) {
+            radius = (wWidth - 10) / 2;
+        }
+        else {
+            if (wWidth >= wHeight)
+                radius = wHeight / 2;
+            else
+                radius = wWidth / 2;
+        }
+        return radius;
+    };
     /**
      * Remove duplicate values from tha array
      *
@@ -391,9 +441,9 @@ var Brick = (function () {
         this.$brick = {
             brickEl: null,
             className: className,
-            speed: 5,
+            speed: base.isMobile() ? 10 : 5,
             radiusPosition: radiusPos,
-            height: 20,
+            height: base.isMobile() ? 10 : 20,
             gap: 3,
             anglePosition: anglePosition > -1 ? anglePosition : 360 / edgesNum * Math.floor(Math.random() * edgesNum) // random number between 0 and edges amount
         };

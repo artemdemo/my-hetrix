@@ -10,6 +10,7 @@ body {
 
 #game {
   width: 100%;
+  height: 100%;
 }
 
 #base {
@@ -25,6 +26,7 @@ body {
 #field.cyan { stroke: #17B4BA; }
 #field.purple { stroke: #9034BD; }
 #field.orange { stroke: #DB8D25; }
+
 /*-------------- Bricks ------------------*/
 
 .ygreen { fill: #448C0A; }
@@ -49,21 +51,32 @@ body {
 
 .base-score {
   fill: white;
-  font-size: 40px;
+  font-size: 60px;
 }
 
+@media (max-height: 800px) {
+  .base-score { font-size: 40px; }
+}
+@media (max-width: 900px) {
+  .base-score { font-size: 40px; }
+}
+@media (max-width: 480px) {
+  .base-score { font-size: 20px; }
+}
+
+/*------------- Controllers -------------------*/
+
+.controller {
+  stroke: gray;
+  fill: white;
+}
 
 /*------------- Game Over -------------------*/
 
 #game-over {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
+  position: fixed;
   background-color: rgba(0, 0, 0, 0.80);
   opacity: 0;
-
   -webkit-transition: 0.5s;
   transition: 0.5s;
 
@@ -75,7 +88,17 @@ body {
     text-shadow: 0 0 79px black;
   }
 }
-#game-over.show { opacity: 1; }
+#game-over.show {
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  opacity: 1;
+}
+
+@media (max-width: 480px) {
+  #game-over .text { font-size: 60px; }
+}
 
 
 

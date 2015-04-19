@@ -63,33 +63,39 @@ class Base {
     private attachedBricks:Brick[] = [];
 
     constructor(gameID: string) {
-        var wHeight:number;
+        var wHeight:number, wWidth: number;
 
         // Create main game paper
         this.$gamePaper = Snap( gameID );
 
         // calculate height of the paper
         wHeight = window.innerHeight - 10;
+        wWidth = window.innerWidth;
+
         this.$gamePaper.node.style.height = wHeight + '.px';
+        this.$gamePaper.node.style.width = wWidth + '.px';
+
+        this.$field = {
+            fieldEl: null,
+            radius: this.calculateFieldRadius( wWidth, wHeight )
+            //radius: this.isMobile() ? (wWidth - 10) / 2 : 100
+        };
 
         // Setting up basic data about control hexagon element
         this.$base = {
             baseEl: null,
-            baseX: window.innerWidth / 2,
-            baseY: window.innerHeight / 2,
-            rotationTime: 100,
-            radius: 100,
+            baseX: wWidth / 2,
+            baseY: wHeight / 2,
+            rotationTime: this.isMobile() ? 65 : 100,
+            radius: this.$field.radius / 4.2,
             edgesNum: 6,
             startAngle: 0
         };
 
-        this.$field = {
-            fieldEl: null,
-            radius: this.$base.radius * 4.5
-        };
-
         this.drawBase();
-        this.bindEvents();
+        if ( this.isMobile() ) this.addControllers();
+            else this.bindEvents();
+
         this.updateColors(1);
 
         this.$score = new Score( this );
@@ -409,6 +415,32 @@ class Base {
     }
 
     /**
+     * In case game was opened from mobile I need to add controllers
+     */
+    private addControllers() {
+        var left:number = 50;
+        var bottom:number = 60;
+        var radius:number = 30;
+        var wWidth:number = window.innerWidth;
+        var wHeight:number = window.innerHeight;
+        var leftCircle = this.$gamePaper.circle(left, wHeight - bottom, radius);
+        var rightCircle = this.$gamePaper.circle(wWidth - left, wHeight - bottom, radius);
+        leftCircle
+            .addClass('controller')
+            .click(()=>{
+                this.fireLeft();
+            });
+
+        console.log( rightCircle );
+
+        rightCircle
+            .addClass('controller')
+            .click(()=>{
+                this.fireRight();
+            });
+    }
+
+    /**
      * Actions in case LEFT arrow was clicked
      */
     fireLeft() {
@@ -422,6 +454,15 @@ class Base {
     fireRight() {
         this.rotateBase('right');
         this.rotateBricks('right');
+    }
+
+    /**
+     * Check whether device is mobile or not
+     *
+     * @returns {boolean}
+     */
+    isMobile() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     }
 
     /**
@@ -458,6 +499,17 @@ class Base {
             brick.rotateBrick( direction );
         }
         return true;
+    }
+
+    private calculateFieldRadius( wWidth:number, wHeight:number ) {
+        var radius:number;
+        if ( this.isMobile() ) {
+            radius = (wWidth - 10) / 2
+        } else {
+            if ( wWidth >= wHeight ) radius =  wHeight / 2;
+            else radius = wWidth / 2
+        }
+        return radius;
     }
 
     /**

@@ -185,6 +185,11 @@ declare module Snap {
         outerSVG(): string;
         innerSVG(): string;
 
+        addClass( className: string ): Element;
+        removeClass( className: string ): Element;
+        toggleClass( className: string ): Element;
+        hasClass( className: string, flag: boolean ): boolean;
+
         click(handler: Function): Object;
         unclick(handler: Function): Object;
         dblclick(handler: Function): Object;
