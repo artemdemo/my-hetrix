@@ -8,7 +8,7 @@
 
 interface Filter {
     blur(x: number, y?: number): string;
-    shadow(dx: number, dy: number, blur?: number, color?: string): string;
+    shadow(dx: number, dy: number, blur?: number, color?: string, opacity?:number): string;
     grayscale(amount: number): string;
     sepia(amount: number): string;
     saturate(amount: number): string;

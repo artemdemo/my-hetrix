@@ -16,6 +16,11 @@ var Base = (function () {
          * @type {string[]}
          */
         this.colors = [];
+        /**
+         * Will contain mobile status (boolean)
+         * I will use it after isMobile checked status via RegEx
+         */
+        this.isMobileStatus = null;
         this.attachedBricks = [];
         var wHeight, wWidth;
         // Create main game paper
@@ -40,10 +45,12 @@ var Base = (function () {
             startAngle: 0
         };
         this.drawBase();
-        if (this.isMobile())
+        if (this.isMobile()) {
             this.addControllers();
-        else
+        }
+        else {
             this.bindEvents();
+        }
         this.updateColors(1);
         this.$score = new Score(this);
     }
@@ -112,9 +119,38 @@ var Base = (function () {
         }
     };
     Base.prototype.setNextBrickColor = function (nextColor) {
-        var fieldNode = this.$field.fieldEl.node;
-        // ToDo: I don't like this solution - add hexagon to the right bottom side - it will suggest next color
-        //fieldNode.setAttribute('class', nextColor);
+        if (this.isMobile()) {
+            // Mobile is not fast therefore I'm using different concept
+            this.$nextColorEl.node.setAttribute('class', nextColor);
+        }
+        else {
+            var field = this.$field.fieldEl;
+            var color;
+            var filterDefinition;
+            switch (true) {
+                case nextColor == 'ygreen':
+                    color = '#448C0A';
+                    break;
+                case nextColor == 'blue':
+                    color = '#2F62B2';
+                    break;
+                case nextColor == 'purple':
+                    color = '#9034BD';
+                    break;
+                case nextColor == 'orange':
+                    color = '#DB8D25';
+                    break;
+                case nextColor == 'cyan':
+                    color = '#17B4BA';
+                    break;
+                default:
+                    color = '#CCCCCC';
+            }
+            filterDefinition = this.$gamePaper.filter(Snap.filter.shadow(0, 0, 7, color, 0.7));
+            field.attr({
+                filter: filterDefinition
+            });
+        }
     };
     /**
      * Attach new brick to the base
@@ -341,6 +377,8 @@ var Base = (function () {
             .click(function () {
             _this.fireRight();
         });
+        this.$nextColorEl = this.$gamePaper.circle(wWidth / 2, wHeight - bottom, radius / 2);
+        this.$nextColorEl.node.id = 'next-color';
     };
     /**
      * Actions in case LEFT arrow was clicked
@@ -362,7 +400,9 @@ var Base = (function () {
      * @returns {boolean}
      */
     Base.prototype.isMobile = function () {
-        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (this.isMobileStatus == null)
+            this.isMobileStatus = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        return this.isMobileStatus;
     };
     /**
      * Rotate base

@@ -15,21 +15,6 @@ body {
   fill: #EFEFEF;
   stroke-width: 2px;
 }
-#field.ygreen {
-  stroke: #448C0A;
-}
-#field.blue {
-  stroke: #2F62B2;
-}
-#field.cyan {
-  stroke: #17B4BA;
-}
-#field.purple {
-  stroke: #9034BD;
-}
-#field.orange {
-  stroke: #DB8D25;
-}
 /*-------------- Bricks ------------------*/
 .ygreen {
   fill: #448C0A;
@@ -78,6 +63,21 @@ body {
 .controller {
   stroke: gray;
   fill: white;
+}
+#next-color.ygreen {
+  fill: #448C0A;
+}
+#next-color.blue {
+  fill: #2F62B2;
+}
+#next-color.cyan {
+  fill: #17B4BA;
+}
+#next-color.purple {
+  fill: #9034BD;
+}
+#next-color.orange {
+  fill: #DB8D25;
 }
 /*------------- Game Over -------------------*/
 #game-over {
