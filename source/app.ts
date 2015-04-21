@@ -9,7 +9,9 @@ new Brick( base, 'ygreen', 0 );
 var nextColor = base.colors[ Math.floor(Math.random() * base.colors.length) ];
 base.setNextBrickColor( nextColor );
 
-var _interval = setInterval(function(){
+var _interval;
+
+var gameStep = function(){
     var colors:string[] = base.colors;
 
     new Brick( base, nextColor );
@@ -20,7 +22,14 @@ var _interval = setInterval(function(){
     }
     nextColor = colors[ Math.floor(Math.random() * colors.length) ];
     base.setNextBrickColor( nextColor );
-}, 1000);
+};
+
+_interval = setInterval(gameStep, 1000);
+
+document.addEventListener("keydown", function(e) {
+    // pressed 'p' button
+    if ( e.keyCode == 80 ) clearInterval(_interval);
+}, false);
 
 /*// Test Falling after removing bottom bricks
  var bricksCount = 1;
