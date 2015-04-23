@@ -26,18 +26,22 @@ class Brick {
      * @param className {string} - optional
      * @param anglePosition {number}
      */
-    constructor( base: Base, className:string = 'ygreen', anglePosition:number = -1 ) {
+    constructor( base: Base, className:string = 'ygreen', anglePosition:number = -1, speed:number = -1 ) {
         var radiusPos = base.$field.radius;
         var edgesNum = base.$base.edgesNum;
+        var brickSpeed:number;
 
         this.$baseObjRef = base;
+
+        if ( speed != -1 ) brickSpeed = speed;
+            else brickSpeed = base.isMobile() ? 10 : 5;
 
         this.$brick = {
             brickEl: null,
             className: className,
-            speed: base.isMobile() ? 10 : 5,
+            speed: brickSpeed,
             radiusPosition: radiusPos,
-            height: base.isMobile() ? 10 : 20,
+            height: base.isMobile() ? 10 : 25,
             gap: 3,
             anglePosition: anglePosition > -1 ? anglePosition : 360 / edgesNum * Math.floor(Math.random() * edgesNum) // random number between 0 and edges amount
         };
