@@ -472,18 +472,24 @@ var Brick = (function () {
      * @param className {string} - optional
      * @param anglePosition {number}
      */
-    function Brick(base, className, anglePosition) {
+    function Brick(base, className, anglePosition, speed) {
         if (className === void 0) { className = 'ygreen'; }
         if (anglePosition === void 0) { anglePosition = -1; }
+        if (speed === void 0) { speed = -1; }
         var radiusPos = base.$field.radius;
         var edgesNum = base.$base.edgesNum;
+        var brickSpeed;
         this.$baseObjRef = base;
+        if (speed != -1)
+            brickSpeed = speed;
+        else
+            brickSpeed = base.isMobile() ? 10 : 5;
         this.$brick = {
             brickEl: null,
             className: className,
-            speed: base.isMobile() ? 10 : 5,
+            speed: brickSpeed,
             radiusPosition: radiusPos,
-            height: base.isMobile() ? 10 : 20,
+            height: base.isMobile() ? 10 : 25,
             gap: 3,
             anglePosition: anglePosition > -1 ? anglePosition : 360 / edgesNum * Math.floor(Math.random() * edgesNum) // random number between 0 and edges amount
         };
@@ -676,35 +682,56 @@ var Score = (function () {
 /// <reference path="Brick_class.ts" />
 /// <reference path="Score_class.ts" />
 var base = new Base('#game');
-new Brick(base, 'ygreen', 0);
-var nextColor = base.colors[Math.floor(Math.random() * base.colors.length)];
-base.setNextBrickColor(nextColor);
-var _interval;
-var gameStep = function () {
-    var colors = base.colors;
-    new Brick(base, nextColor);
-    if (!!base.gameOver) {
-        var $gameOver = document.getElementById('game-over');
-        $gameOver.className += ' show';
-        clearInterval(_interval);
-    }
-    nextColor = colors[Math.floor(Math.random() * colors.length)];
+/**
+ * Real game
+ * http://localhost/my-hextris/
+ */
+if (urlParam('isTest') != 'true') {
+    new Brick(base, 'ygreen', 0);
+    var nextColor = base.colors[Math.floor(Math.random() * base.colors.length)];
     base.setNextBrickColor(nextColor);
-};
-_interval = setInterval(gameStep, 1000);
-document.addEventListener("keydown", function (e) {
-    // pressed 'p' button
-    if (e.keyCode == 80)
-        clearInterval(_interval);
-}, false);
-/*// Test Falling after removing bottom bricks
- var bricksCount = 1;
-var _interval = setInterval(function(){
-    if ( bricksCount < 3 ) new Brick( base, 'blue', 60 );
-    else if ( bricksCount == 3 ) new Brick( base, 'orange', 60 );
-    else if ( bricksCount == 4 ) new Brick( base, 'purple', 60 );
-    else new Brick( base, 'blue', 120 );
-
-    if ( bricksCount++ > 5 ) clearInterval(_interval);
-}, 1000);*/
+    var _interval;
+    var gameStep = function () {
+        var colors = base.colors;
+        new Brick(base, nextColor);
+        if (!!base.gameOver) {
+            var $gameOver = document.getElementById('game-over');
+            $gameOver.className += ' show';
+            clearInterval(_interval);
+        }
+        nextColor = colors[Math.floor(Math.random() * colors.length)];
+        base.setNextBrickColor(nextColor);
+    };
+    _interval = setInterval(gameStep, 1000);
+    document.addEventListener("keydown", function (e) {
+        // pressed 'p' button
+        if (e.keyCode == 80)
+            clearInterval(_interval);
+    }, false);
+}
+/**
+ * Test mode
+ * http://localhost/my-hextris/?isTest=true
+ */
+if (urlParam('isTest') == 'true') {
+    var bricksCount = 1;
+    var _interval = setInterval(function () {
+        var fallSpeed = 1;
+        if (bricksCount < 3)
+            new Brick(base, 'blue', 60, fallSpeed);
+        else if (bricksCount == 3)
+            new Brick(base, 'orange', 60, fallSpeed);
+        else if (bricksCount == 4)
+            new Brick(base, 'purple', 60, fallSpeed);
+        else
+            new Brick(base, 'blue', 120, fallSpeed);
+        if (bricksCount++ > 5)
+            clearInterval(_interval);
+    }, 500);
+}
+function urlParam(name) {
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"), results = regex.exec(location.search);
+    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
 //# sourceMappingURL=app.js.map
