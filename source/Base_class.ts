@@ -83,8 +83,8 @@ class Base {
         wHeight = window.innerHeight - 10;
         wWidth = window.innerWidth;
 
-        this.$gamePaper.node.style.height = wHeight + '.px';
-        this.$gamePaper.node.style.width = wWidth + '.px';
+        this.$gamePaper.node.style.height = wHeight + 'px';
+        this.$gamePaper.node.style.width = wWidth + 'px';
 
         this.$field = {
             fieldEl: null,
